@@ -131,7 +131,9 @@ class Product(BaseSeoModel, ModelWithDescription):
     def clean(self):
         super().clean()
         if self.product_type_id and self.product_type.abstract:
-            raise ValidationError("Abstract product type %s can not have any product." % self.product_type)
+            raise ValidationError(
+                {"product_type": "Abstract product type %s can not have any product." % self.product_type}
+            )
 
     def refresh_from_db(self, using=None, fields=None, from_queryset=None):
         result = super().refresh_from_db(using, fields, from_queryset)

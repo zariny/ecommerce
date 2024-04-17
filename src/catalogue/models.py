@@ -69,7 +69,7 @@ class Category(MP_Node, BaseSeoModel, ModelWithDescription):
     _full_name_seperator = " > "
 
     @property
-    def full_name(self):
+    def full_name(self) -> str:
         names = [category.name for category in self.get_ancestors()]
         names.append(self.name)
         return self._full_name_seperator.join(names)
@@ -77,7 +77,7 @@ class Category(MP_Node, BaseSeoModel, ModelWithDescription):
     _full_slug_seperator = "/"
 
     @property
-    def full_slug(self):
+    def full_slug(self) -> str:
         slugs = [category.slug for category in self.get_ancestors()]
         slugs.append(self.slug)
         return self._full_slug_seperator.join(slugs)

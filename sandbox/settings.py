@@ -46,6 +46,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # ASGI server
+    "daphne",
+    # built in
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -58,6 +61,7 @@ INSTALLED_APPS = [
     "core",
     "products",
     # third-party apps
+    "channels",
     "rest_framework",
     "rest_framework_simplejwt",
     "django_filters",
@@ -80,7 +84,7 @@ MIDDLEWARE = [
 ]
 
 
-ROOT_URLCONF = "urls"
+ROOT_URLCONF = "sandbox.urls"
 
 TEMPLATES = [
     {
@@ -101,8 +105,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "wsgi.application"
-
+# WSGI_APPLICATION = "wsgi.application"
+ASGI_APPLICATION = 'sandbox.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -262,3 +266,10 @@ CORS_ALLOWED_ORIGINS = env(
 )
 
 CORS_ALLOW_CREDENTIALS = True  # Allow cookies to be sent/received
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
