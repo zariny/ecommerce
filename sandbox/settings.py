@@ -11,11 +11,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent
 import sys
-sys.path.append(str(BASE_DIR / 'src'))
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(BASE_DIR / "src"))
+sys.path.append(str(BASE_DIR)) # -> ecommerce directory
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,7 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # apps
-    'src.catalogue',
+    'catalogue',
+    'core',
 
     # third-party apps
     'treebeard',

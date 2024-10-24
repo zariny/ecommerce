@@ -1,5 +1,5 @@
 from django.db import models
-from src.core.models import BaseSeoModel, ModelWithMetadata
+from src.core.models import BaseSeoModel, ModelWithMetadata, TranslationModel
 from treebeard.mp_tree import MP_Node
 
 
@@ -11,6 +11,10 @@ class Category(MP_Node, BaseSeoModel, ModelWithMetadata):
     background = models.ImageField(upload_to="category-background", blank=True, null=True)
     background_caption = models.CharField(max_length=128, blank=True)
 
+    is_public = models.BooleanField(default=True)
+    ancestors_are_public = models.BooleanField(default=True)
+
+    _full_name_seperator = '>'
     class Meta:
         verbose_name = "category"
         verbose_name_plural = "categories"
@@ -20,3 +24,13 @@ class Category(MP_Node, BaseSeoModel, ModelWithMetadata):
 
     def __repr__(self):
         return "<%s object> %s" % (self.__class__.__name__, str(self))
+
+    @property
+    def full_name(self):
+        pass
+
+
+class CategoryTranslation(TranslationModel):
+    category = models.ForeignKey("catalogue.Category", on_delete=models.CASCADE, related_name="translations")
+    name = models.CharField(max_length=255, unique=True, blank=True, null=True)
+    description = models.TextField(unique=True, blank=True, null=True)

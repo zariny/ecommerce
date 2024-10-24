@@ -9,13 +9,27 @@ class BaseSeoModel(models.Model):
         abstract = True
 
 
+class BaseTranslateModel(models.Model):
+    language_code = models.CharField(max_length=35)
+
+    class Meta:
+        abstract = True
+
+
 class SeoModel(BaseSeoModel):
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, editable=False)
 
     class Meta:
         abstract = True
 
+
 class ModelWithMetadata(models.Model):
     metadata = models.JSONField(default=str, blank=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
+class TranslationModel(BaseSeoModel, BaseTranslateModel):
     class Meta:
         abstract = True
