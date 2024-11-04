@@ -14,8 +14,13 @@ class Category(MP_Node, BaseSeoModel, ModelWithMetadata):
     is_public = models.BooleanField(default=True)
     ancestors_are_public = models.BooleanField(default=True)
 
-    _full_name_seperator = '>'
     class Meta:
+        indexes = (
+            models.Index(fields=["name"]),
+            models.Index(fields=["slug"]),
+            models.Index(fields=["path"]),
+            models.Index(fields=["depth"]),
+        )
         app_label = "catalogue"
         ordering = ("path",)
         verbose_name = "category"
@@ -25,18 +30,26 @@ class Category(MP_Node, BaseSeoModel, ModelWithMetadata):
         return self.name or self.slug
 
     def __repr__(self):
-        return "<%s object> %s" % (self.__class__.__name__, str(self.full_name))
+        return "<%s obj> %s" % (type(self).__name__, self.name)
+
+    _full_name_seperator = " > "
 
     @property
     def full_name(self):
         names = [category.name for category in self.get_ancestors()]
+        names.append(self.name)
         return self._full_name_seperator.join(names)
 
-    def has_children(self):
-        return self.get_num_children() > 0
+    _full_slug_seperator = "/"
 
-    def get_num_children(self):
-        return self.numchild().count()
+    @property
+    def full_slug(self):
+        slugs = [category.slug for category in self.get_ancestors()]
+        slugs.append(self.slug)
+        return self._full_slug_seperator.join(slugs)
+
+    def has_children(self):
+        return self.numchild > 0
 
 
 class CategoryTranslation(TranslationModel):
@@ -44,6 +57,12 @@ class CategoryTranslation(TranslationModel):
     name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return "%s - %s" % (self.category.name, self.name or self._default_presentation)
+
     class Meta:
+        indexes = (
+            models.Index(fields=["category"]),
+            )
         app_label = "catalogue"
         unique_together = (("language_code", "category"),)

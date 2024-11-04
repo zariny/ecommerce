@@ -24,6 +24,7 @@ class IsPublicFilter(admin.SimpleListFilter):
 @admin.register(Category)
 class CategoryAdmin(TreeAdmin):
     form = movenodeform_factory(Category)
+    list_display = ("name", "is_public")
     list_filter = (IsPublicFilter,)
 
     fieldsets = (

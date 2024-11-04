@@ -12,6 +12,8 @@ class BaseSeoModel(models.Model):
 class BaseTranslateModel(models.Model):
     language_code = models.CharField(max_length=35)
 
+    _default_presentation = "Not Translated"
+
     class Meta:
         abstract = True
 
