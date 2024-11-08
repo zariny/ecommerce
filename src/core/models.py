@@ -26,7 +26,7 @@ class SeoModel(BaseSeoModel):
 
 
 class ModelWithMetadata(models.Model):
-    metadata = models.JSONField(default=str, blank=True, null=True)
+    metadata = models.JSONField(default=dict, blank=True, null=True)
 
     class Meta:
         abstract = True
