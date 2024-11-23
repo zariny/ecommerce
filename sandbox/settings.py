@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # apps
     'catalogue',
     'core',
+    'products',
 
     # third-party apps
     'treebeard',
