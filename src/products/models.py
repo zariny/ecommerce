@@ -42,7 +42,6 @@ class Product(SeoModel, ModelWithMetadata):
         return "<%s> obj %s" % (type(self).__name__, self.title or self.slug)
 
 
-
 class ProductAttribute(models.Model):
     product_class = models.ForeignKey(
         "products.ProductClass",
@@ -56,7 +55,7 @@ class ProductAttribute(models.Model):
     name = models.CharField(max_length=250)
     slug = models.SlugField(max_length=128, unique=True)
     value_type = models.CharField(max_length=20, choices=VALUE_TYPE_CHOICE, default=VALUE_TYPE_CHOICE[0][0])
-    require = models.BooleanField(default=False)\
+    require = models.BooleanField(default=False)
 
 
     class Meta:
@@ -80,10 +79,31 @@ class ProductAttributeValue(models.Model):
 
 
     def __str__(self):
-        return "%s %s" % (self.attribute, self.value_as_text)
+        return self.attribute.name
 
-    _default_representation = "<No display>"
+    _default_representation = "<No Display>"
+
 
     @property
-    def value_as_text(self):
-        return self._default_representation
+    def data_type(self):
+        return self.attribute.value_type
+
+    @property
+    def proper_field(self):
+        match self.data_type:
+            case "charactor" | "text":
+                field = models.TextField
+            case "integer":
+                field = models.IntegerField
+            case "float":
+                field = models.FloatField
+            case "boolean":
+                field = models.BooleanField
+            case _:
+                field = models.JSONField
+
+        return field
+
+    def clean(self):
+        field = self.proper_field
+        field().clean(self.value, self)
