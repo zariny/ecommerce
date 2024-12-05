@@ -1,6 +1,7 @@
-from django.db import models
 from src.core.models import SeoModel, ModelWithMetadata
+from django.db import models
 from .utils import VALUE_TYPE_CHOICE
+from .fields import DynamicValueField
 
 
 class ProductClass(ModelWithMetadata):
@@ -70,7 +71,7 @@ class ProductAttribute(models.Model):
 class ProductAttributeValue(models.Model):
     product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="attribute_values")
     attribute = models.ForeignKey("products.ProductAttribute", on_delete=models.CASCADE)
-    value = models.JSONField()
+    value = DynamicValueField()
 
 
     class Meta:
@@ -87,23 +88,3 @@ class ProductAttributeValue(models.Model):
     @property
     def data_type(self):
         return self.attribute.value_type
-
-    @property
-    def proper_field(self):
-        match self.data_type:
-            case "charactor" | "text":
-                field = models.TextField
-            case "integer":
-                field = models.IntegerField
-            case "float":
-                field = models.FloatField
-            case "boolean":
-                field = models.BooleanField
-            case _:
-                field = models.JSONField
-
-        return field
-
-    def clean(self):
-        field = self.proper_field
-        field().clean(self.value, self)
