@@ -1,15 +1,14 @@
 from django import forms
-from . import models
+from .models import ProductAttributeValue
+from .utils import proper_field
 
 
-class ProductAttributeValueChangeForm(forms.ModelForm):
+class ProductAttributeValueForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        proper_field = self.instance.proper_field
-        proper_form = proper_field().formfield()
-        self.fields["value"] = proper_form
-
+        if self.instance.id:
+            self.fields["value"] = proper_field(self.instance.data_type).formfield()
 
     class Meta:
-        model = models.ProductAttributeValue
+        model = ProductAttributeValue
         fields = "__all__"
