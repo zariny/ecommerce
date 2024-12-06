@@ -5,7 +5,6 @@ from .utils import proper_field
 
 class DynamicValueField(models.JSONField):
     def clean(self, value, model_instance):
-        # print("calling clean method from field")
         datatype = model_instance.data_type
         field = proper_field(datatype)
 
@@ -21,9 +20,7 @@ class DynamicValueField(models.JSONField):
             value = str(value)
 
         value = self._json_storage_schema(datatype, value)
-
-        value = super().clean(value, model_instance)
-        return value
+        return super().clean(value, model_instance)
 
     def from_db_value(self, value, expression, connection):
         value = super().from_db_value(value, expression, connection)
