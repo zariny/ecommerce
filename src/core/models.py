@@ -32,6 +32,14 @@ class ModelWithMetadata(models.Model):
         abstract = True
 
 
+class ModelWithDescription(ModelWithMetadata):
+    description = models.TextField(blank=True)
+
+    class Meta:
+        abstract = True
+
+
 class TranslationModel(BaseSeoModel, BaseTranslateModel):
+
     class Meta:
         abstract = True

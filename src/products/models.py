@@ -1,7 +1,8 @@
-from src.core.models import SeoModel, ModelWithMetadata
+from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata
 from django.db import models
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
+from src.core.models import TranslationModel
 
 
 class ProductClass(ModelWithMetadata):
@@ -22,7 +23,7 @@ class ProductClass(ModelWithMetadata):
         return "<%s> obj %s" % (type(self).__name__, self.title or self.slug)
 
 
-class Product(SeoModel, ModelWithMetadata):
+class Product(BaseSeoModel, ModelWithDescription):
     product_type = models.ForeignKey("products.ProductClass", on_delete=models.PROTECT, related_name="products")
     title = models.CharField(max_length=250, db_index=True)
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, auto_created="title", db_index=True)
@@ -34,6 +35,7 @@ class Product(SeoModel, ModelWithMetadata):
 
     class Meta:
         app_label = "products"
+        ordering = ("-updated_at",)
 
 
     def __str__(self):

@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
-from src.core.models import BaseSeoModel, ModelWithMetadata, TranslationModel
+from src.core.models import BaseSeoModel, ModelWithDescription, TranslationModel
 from treebeard.mp_tree import MP_Node
 
 
@@ -30,10 +30,9 @@ class ReverseStartsWithLookup(models.lookups.StartsWith):
 models.Field.register_lookup(ReverseStartsWithLookup, "rstartswith")
 
 
-class Category(MP_Node, BaseSeoModel, ModelWithMetadata):
+class Category(MP_Node, BaseSeoModel, ModelWithDescription):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, auto_created="name", allow_unicode=True)
-    description = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
     background = models.ImageField(upload_to="category-background", blank=True, null=True)
     background_caption = models.CharField(max_length=128, blank=True)
