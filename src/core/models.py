@@ -1,4 +1,5 @@
 from django.db import models
+from treebeard.templatetags.admin_tree import result_tree
 
 
 class BaseSeoModel(models.Model):
@@ -16,6 +17,10 @@ class BaseTranslateModel(models.Model):
 
     class Meta:
         abstract = True
+
+
+    def __str__(self):
+        return self._default_presentation
 
 
 class SeoModel(BaseSeoModel):

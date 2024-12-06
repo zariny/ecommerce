@@ -26,3 +26,8 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
 class ProductAttributeAdmin(admin.ModelAdmin):
     list_display = ("name", "value_type", "require")
     search_fields = ("name", "slug")
+
+
+admin.site.register(models.ProductTranslate)
+admin.site.register(models.ProductAttributeTranslate)
+admin.site.register(models.ProductAttributeValueTranslate)

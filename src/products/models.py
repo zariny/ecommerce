@@ -90,3 +90,56 @@ class ProductAttributeValue(models.Model):
     @property
     def data_type(self):
         return self.attribute.value_type
+
+
+class ProductTranslate(TranslationModel):
+    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="translations")
+    title = models.CharField(max_length=250)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        indexes = (
+            models.Index(fields=["product"]),
+        )
+        app_label = "products"
+        unique_together = (("language_code", "product"),)
+
+
+    def __str__(self):
+        return "%s - %s" % (self.product.title, self.title or self._default_presentation)
+
+
+class ProductAttributeTranslate(TranslationModel):
+    attribute = models.ForeignKey("products.ProductAttribute", on_delete=models.CASCADE, related_name="translations")
+    name = models.CharField(max_length=250)
+
+    class Meta:
+        indexes = (
+            models.Index(fields=["attribute"]),
+        )
+        app_label = "products"
+        unique_together = (("language_code", "attribute"),)
+
+
+    def __str__(self):
+        return "%s - %s" % (self.attribute.name, self.name or self._default_presentation)
+
+
+class ProductAttributeValueTranslate(TranslationModel):
+    attribute_value = models.ForeignKey(
+        "products.ProductAttributeValue",
+        on_delete=models.CASCADE,
+        related_name="translations"
+    )
+    value = models.TextField(blank=True)
+
+    class Meta:
+        indexes = (
+            models.Index(fields=["attribute_value"]),
+        )
+        app_label = "products"
+        unique_together = (("language_code", "attribute_value"),)
+
+
+    def __str__(self):
+        return "%s - %s" % (self.attribute_value.attribute.name, self.value or self._default_presentation)
