@@ -1,6 +1,41 @@
 from django.contrib import admin
 from . import models
 from .forms import ProductAttributeValueAdminForm
+from core.admin import AbstractPieChartModelAdmin
+
+
+class IsPublicFilter(admin.SimpleListFilter):
+    title = "Is Public Product"
+    parameter_name = "public"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "public"),
+            ("no", "not public")
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(is_public=True)
+        elif self.value() == "no":
+            return queryset.filter(is_public=False)
+
+
+class IsRequireFilter(admin.SimpleListFilter):
+    title = "Is Require Attribute"
+    parameter_name = "require"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "required"),
+            ("no", "not required")
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(require=True)
+        elif self.value() == "no":
+            return queryset.filter(require=False)
 
 
 class ProductAttributeValueInline(admin.TabularInline):
@@ -10,9 +45,10 @@ class ProductAttributeValueInline(admin.TabularInline):
 
 
 @admin.register(models.Product)
-class ProductAdmin(admin.ModelAdmin):
+class ProductAdmin(AbstractPieChartModelAdmin):
     list_display = ("title", "is_public", "updated_at")
     search_fields = ("title",)
+    list_filter = (IsPublicFilter,)
     inlines = (ProductAttributeValueInline,)
 
 
@@ -23,9 +59,11 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.ProductAttribute)
-class ProductAttributeAdmin(admin.ModelAdmin):
+class ProductAttributeAdmin(AbstractPieChartModelAdmin):
+    change_list_template = "core/pie_chart.html"
     list_display = ("name", "value_type", "require")
     search_fields = ("name", "slug")
+    list_filter = (IsRequireFilter,)
 
 
 admin.site.register(models.ProductTranslate)
