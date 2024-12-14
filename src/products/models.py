@@ -10,10 +10,16 @@ class ProductClass(ModelWithMetadata):
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, auto_created="title", db_index=True)
     require_shipping = models.BooleanField(default=True)
     track_stock = models.BooleanField(default=True)
-
+    bases = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        through="products.ProductClassRelation",
+        related_name="subclasses"
+    )
 
     class Meta:
         app_label = "products"
+        verbose_name_plural = "product classes"
 
 
     def __str__(self):
@@ -21,6 +27,18 @@ class ProductClass(ModelWithMetadata):
 
     def __repr__(self):
         return "<%s> obj %s" % (type(self).__name__, self.title or self.slug)
+
+
+class ProductClassRelation(models.Model):
+    subclass = models.ForeignKey("products.ProductClass", on_delete=models.CASCADE, related_name="base_relations")
+    base = models.ForeignKey("products.ProductClass", on_delete=models.CASCADE, related_name="sub_relations")
+
+    class Meta:
+        unique_together = (("base", "subclass"),)
+        app_label = "products"
+
+    def __str__(self):
+        return "%s inherits from %s" % (self.subclass, self.base)
 
 
 class Product(BaseSeoModel, ModelWithDescription):
@@ -32,11 +50,9 @@ class Product(BaseSeoModel, ModelWithDescription):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-
     class Meta:
         app_label = "products"
         ordering = ("-updated_at",)
-
 
     def __str__(self):
         return self.title or self.slug
@@ -60,11 +76,9 @@ class ProductAttribute(models.Model):
     value_type = models.CharField(max_length=20, choices=VALUE_TYPE_CHOICE, default=VALUE_TYPE_CHOICE[0][0])
     require = models.BooleanField(default=False)
 
-
     class Meta:
         app_label = "products"
         unique_together = (("product_class", "slug"),)
-
 
     def __str__(self):
         return self.name or self.slug
@@ -75,11 +89,9 @@ class ProductAttributeValue(models.Model):
     attribute = models.ForeignKey("products.ProductAttribute", on_delete=models.CASCADE)
     value = DynamicValueField()
 
-
     class Meta:
         app_label = "products"
         unique_together = (("product", "attribute"),)
-
 
     def __str__(self):
         return self.attribute.name
@@ -103,7 +115,7 @@ class ProductTranslate(TranslationModel):
         )
         app_label = "products"
         unique_together = (("language_code", "product"),)
-
+        verbose_name_plural = "translation of products"
 
     def __str__(self):
         return "%s - %s" % (self.product.title, self.title or self._default_presentation)
@@ -119,7 +131,7 @@ class ProductAttributeTranslate(TranslationModel):
         )
         app_label = "products"
         unique_together = (("language_code", "attribute"),)
-
+        verbose_name_plural = "translation of product attributes"
 
     def __str__(self):
         return "%s - %s" % (self.attribute.name, self.name or self._default_presentation)
@@ -139,7 +151,7 @@ class ProductAttributeValueTranslate(TranslationModel):
         )
         app_label = "products"
         unique_together = (("language_code", "attribute_value"),)
-
+        verbose_name_plural = "translation of product attribute value"
 
     def __str__(self):
         return "%s - %s" % (self.attribute_value.attribute.name, self.value or self._default_presentation)

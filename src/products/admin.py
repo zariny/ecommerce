@@ -44,6 +44,16 @@ class ProductAttributeValueInline(admin.TabularInline):
     extra = 1
 
 
+class ProductAttributeInline(admin.TabularInline):
+    model = models.ProductAttribute
+    extra = 1
+
+class ProductClassRelationInline(admin.TabularInline):
+    model = models.ProductClassRelation
+    fk_name = "base"
+    extra = 1
+
+
 @admin.register(models.Product)
 class ProductAdmin(AbstractPieChartModelAdmin):
     list_display = ("title", "is_public", "updated_at")
@@ -66,6 +76,13 @@ class ProductAttributeAdmin(AbstractPieChartModelAdmin):
     list_filter = (IsRequireFilter,)
 
 
+@admin.register(models.ProductClass)
+class ProductClassAdmin(admin.ModelAdmin):
+    list_display = ("title", "require_shipping", "track_stock")
+    inlines = (ProductClassRelationInline, ProductAttributeInline,)
+
+
+admin.site.register(models.ProductClassRelation)
 admin.site.register(models.ProductTranslate)
 admin.site.register(models.ProductAttributeTranslate)
 admin.site.register(models.ProductAttributeValueTranslate)
