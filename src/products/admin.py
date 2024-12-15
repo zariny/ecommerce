@@ -48,9 +48,10 @@ class ProductAttributeInline(admin.TabularInline):
     model = models.ProductAttribute
     extra = 1
 
+
 class ProductClassRelationInline(admin.TabularInline):
     model = models.ProductClassRelation
-    fk_name = "base"
+    fk_name = "subclass"
     extra = 1
 
 

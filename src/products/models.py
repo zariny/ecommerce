@@ -3,9 +3,15 @@ from django.core.exceptions import ValidationError
 from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
+from .validation import validate_no_cycles
+from .exceptions import CycleInheritanceError
 
 
 class ProductClass(ModelWithMetadata):
+    """
+        Each instance of ProductClass can have multiple inheritances from other instances and
+         inherit attributes and options from its ancestor classes.
+    """
     title = models.CharField(max_length=250, db_index=True)
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, auto_created="title", db_index=True)
     require_shipping = models.BooleanField(default=True)
@@ -39,6 +45,24 @@ class ProductClassRelation(models.Model):
 
     def __str__(self):
         return "%s inherits from %s" % (self.subclass, self.base)
+
+    def clean(self):
+        super().clean()
+        if self.base == self.subclass:
+            raise ValidationError("Self-inheritance is not allowed.")
+
+        self._check_reverse_relation()
+
+        try:
+            validate_no_cycles(base_product_kls=self.base, sub_product_kls=self.subclass)
+        except CycleInheritanceError as e:
+            raise ValidationError(message=e.message)
+
+    def _check_reverse_relation(self):
+        # Any two instances of the ProductClass should have only one relationship with each other.
+        if self.base.pk and self.subclass.pk:
+            if type(self)._default_manager.filter(base=self.subclass, subclass=self.base).exists():
+                raise ValidationError("The inverse of this relationship has already been stored.")
 
 
 class Product(BaseSeoModel, ModelWithDescription):
