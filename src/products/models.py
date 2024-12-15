@@ -1,8 +1,8 @@
-from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata
 from django.db import models
+from django.core.exceptions import ValidationError
+from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
-from src.core.models import TranslationModel
 
 
 class ProductClass(ModelWithMetadata):
@@ -10,6 +10,7 @@ class ProductClass(ModelWithMetadata):
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, auto_created="title", db_index=True)
     require_shipping = models.BooleanField(default=True)
     track_stock = models.BooleanField(default=True)
+    abstract = models.BooleanField(default=False) # If True, this product class cannot have any product
     bases = models.ManyToManyField(
         "self",
         symmetrical=False,
@@ -20,7 +21,6 @@ class ProductClass(ModelWithMetadata):
     class Meta:
         app_label = "products"
         verbose_name_plural = "product classes"
-
 
     def __str__(self):
         return self.title or self.slug
@@ -59,6 +59,11 @@ class Product(BaseSeoModel, ModelWithDescription):
 
     def __repr__(self):
         return "<%s> obj %s" % (type(self).__name__, self.title or self.slug)
+
+    def clean(self):
+        super().clean()
+        if self.product_type.abstract:
+            raise ValidationError("Abstract product type %s can not have any product." % self.product_type)
 
 
 class ProductAttribute(models.Model):

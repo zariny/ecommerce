@@ -78,7 +78,7 @@ class ProductAttributeAdmin(AbstractPieChartModelAdmin):
 
 @admin.register(models.ProductClass)
 class ProductClassAdmin(admin.ModelAdmin):
-    list_display = ("title", "require_shipping", "track_stock")
+    list_display = ("title", "abstract", "require_shipping", "track_stock")
     inlines = (ProductClassRelationInline, ProductAttributeInline,)
 
 
