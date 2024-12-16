@@ -1,5 +1,5 @@
 from django.db import models
-from treebeard.templatetags.admin_tree import result_tree
+from django.conf import settings
 
 
 class BaseSeoModel(models.Model):
@@ -11,7 +11,7 @@ class BaseSeoModel(models.Model):
 
 
 class BaseTranslateModel(models.Model):
-    language_code = models.CharField(max_length=35)
+    language_code = models.CharField(max_length=35, choices=settings.CORE_LANGUAGES, default=settings.LANGUAGE_CODE)
 
     _default_presentation = "Not Translated"
 

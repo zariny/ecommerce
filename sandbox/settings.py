@@ -121,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
 
 TIME_ZONE = 'UTC'
 
@@ -147,3 +147,5 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+
+from core.languages import LANGUAGES as CORE_LANGUAGES
