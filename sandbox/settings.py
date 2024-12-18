@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # apps
+    'account',
     'catalogue',
     'core',
     'products',
@@ -97,6 +98,10 @@ DATABASES = {
         'NAME': 'db.sqlite3',
     }
 }
+
+# User model
+
+AUTH_USER_MODEL = 'account.User'
 
 
 # Password validation
