@@ -10,13 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
-import sys
 
+import sys
+import environ
+from pathlib import Path
+from core.languages import LANGUAGES as CORE_LANGUAGES
+
+
+env = environ.Env(
+    # set casting, default value
+    DEBUG=(bool, False)
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "src"))
 sys.path.append(str(BASE_DIR)) # -> ecommerce directory
+
+# Take environment variables from .env file
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -93,11 +104,16 @@ WSGI_APPLICATION = 'wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+    "default": {
+        "ENGINE": env("DATABASE_ENGINE", default="django.db.backends.sqlite3"),
+        "NAME": env("DATABASE_NAME", default="db.sqlite3"),
+        "USER": env("DATABASE_USER", default=None),
+        "PASSWORD": env("DATABASE_PASSWORD", default=None),
+        "HOST": env("DATABASE_HOST", default=None),
+        "PORT": env("DATABASE_PORT", default=None),
     }
 }
+
 
 # User model
 
@@ -152,5 +168,3 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
-
-from core.languages import LANGUAGES as CORE_LANGUAGES
