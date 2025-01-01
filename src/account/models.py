@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from core.models import ModelWithDescription
 
 
@@ -50,12 +51,20 @@ class User(AbstractBaseUser, PermissionsMixin, ModelWithDescription):
 
     class Meta:
         app_label = "account"
-        ordering = ("email",)
+        ordering = ("-updated_at",)
 
     def __str__(self):
-        return self.full_name or self.email
+        return self.get_full_name() or self.email
 
-    @property
-    def full_name(self):
-        if self.first_name and self.last_name:
-            return "%s %s" % (self.first_name, self.last_name)
+    def clean(self):
+        super().clean()
+        self.email = type(self)._default_manager.normalize_email(self.email)
+        if type(self)._default_manager.filter(email__iexact=self.email).exclude(pk=self.pk).exists():
+            raise ValidationError({"email": "A user with this email already exists."})
+
+    def get_full_name(self):
+        full_name = "%s %s" % (self.first_name, self.last_name)
+        return full_name.strip()
+
+    def get_short_name(self):
+        return self.first_name
