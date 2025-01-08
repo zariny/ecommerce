@@ -168,3 +168,54 @@ INTERNAL_IPS = [
     "127.0.0.1",
     # ...
 ]
+
+
+# LOGGING
+import logging
+
+
+class MultiLineFormatter(logging.Formatter): # TODO Bad practice
+    def format(self, record):
+        original_message = super().format(record)
+        max_length = 140
+        lines = [original_message[i:i + max_length] for i in range(0, len(original_message), max_length)]
+        s = '\n'.join(lines)
+        return "%s \n" % s
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'multiline': {
+            '()': MultiLineFormatter,
+            'format': '[%(levelname)s]: %(message)s',
+        },
+    },
+
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+
+        'logfile': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'log' / 'debug.log',
+            'formatter': 'multiline',
+            'mode': 'a',
+            'maxBytes': 7000,
+            'backupCount': 2,
+            'delay': False
+        }
+    },
+}
+
+if env("LOGGING_QUERIES", default=False):
+    LOGGING.setdefault(
+        'loggers', {
+            'django.db.backends': {
+                'level': 'DEBUG',
+                'handlers': ['logfile'],
+                'propagate': False,
+            }
+        }
+    )
