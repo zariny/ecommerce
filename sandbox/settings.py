@@ -14,7 +14,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import sys
 import environ
 from pathlib import Path
-from core.languages import LANGUAGES as CORE_LANGUAGES
 
 
 env = environ.Env(
@@ -28,6 +27,7 @@ sys.path.append(str(BASE_DIR)) # -> ecommerce directory
 
 # Take environment variables from .env file
 environ.Env.read_env(BASE_DIR / ".env")
+from core.languages import LANGUAGES as CORE_LANGUAGES
 
 
 # Quick-start development settings - unsuitable for production
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'products',
 
     # third-party apps
+    'rest_framework',
     'treebeard',
     'debug_toolbar',
 ]
