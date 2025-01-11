@@ -116,6 +116,16 @@ DATABASES = {
 }
 
 
+# Caches
+
+CACHES = {
+    "default": {
+        "BACKEND": env("CACHE_BACKEND", default="django.core.cache.backends.locmem.LocMemCache"),
+        "LOCATION": env("CACHE_LOCATION", default=None),
+        "TIMEOUT": env("CACHE_TIMEOUT", default=300),
+    }
+}
+
 # User model
 
 AUTH_USER_MODEL = 'account.User'

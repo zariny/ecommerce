@@ -18,6 +18,7 @@ psycopg2-binary==2.9.10
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
+redis==5.2.1
 six==1.16.0
 sqlparse==0.5.1
 stack-data==0.6.3
