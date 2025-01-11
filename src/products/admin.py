@@ -45,7 +45,7 @@ class ProductAttributeValueInline(admin.TabularInline):
 
 
 class ProductAttributeInline(admin.TabularInline):
-    model = models.ProductAttribute
+    model = models.ProductAttribute.product_class.through
     extra = 1
 
 
@@ -75,12 +75,13 @@ class ProductAttributeAdmin(AbstractPieChartModelAdmin):
     list_display = ("name", "value_type", "require")
     search_fields = ("name", "slug")
     list_filter = (IsRequireFilter,)
+    filter_horizontal = ('product_class',)
 
 
 @admin.register(models.ProductClass)
 class ProductClassAdmin(admin.ModelAdmin):
     list_display = ("title", "abstract", "require_shipping", "track_stock")
-    inlines = (ProductClassRelationInline, ProductAttributeInline,)
+    inlines = (ProductClassRelationInline, ProductAttributeInline)
 
 
 admin.site.register(models.ProductClassRelation)

@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.core.cache import cache
 from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
@@ -91,15 +92,7 @@ class Product(BaseSeoModel, ModelWithDescription):
 
 
 class ProductAttribute(models.Model):
-    product_class = models.ForeignKey(
-        "products.ProductClass",
-        on_delete=models.PROTECT,
-        related_name="attributes",
-        blank=True,
-        null=True,
-        db_index=True,
-    )
-
+    product_class = models.ManyToManyField("products.ProductClass", related_name="attributes", blank=True)
     name = models.CharField(max_length=250)
     slug = models.SlugField(max_length=128, unique=True)
     value_type = models.CharField(max_length=20, choices=VALUE_TYPE_CHOICE, default=VALUE_TYPE_CHOICE[0][0])
@@ -107,7 +100,6 @@ class ProductAttribute(models.Model):
 
     class Meta:
         app_label = "products"
-        unique_together = (("product_class", "slug"),)
 
     def __str__(self):
         return self.name or self.slug
