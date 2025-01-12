@@ -5,6 +5,7 @@ from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
 from .validation import validate_no_cycles
 from .exceptions import CycleInheritanceError
+from .managers import ProductQuerySet
 
 
 class ProductClass(ModelWithMetadata):
@@ -104,6 +105,8 @@ class Product(BaseSeoModel, ModelWithDescription):
     attributes = models.ManyToManyField("products.ProductAttribute", through="products.ProductAttributeValue")
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+    objects = ProductQuerySet.as_manager()
 
     class Meta:
         app_label = "products"
