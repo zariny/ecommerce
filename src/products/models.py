@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from django.core.cache import cache
 from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
@@ -34,6 +33,37 @@ class ProductClass(ModelWithMetadata):
 
     def __repr__(self):
         return "<%s> obj %s" % (type(self).__name__, self.title or self.slug)
+
+    def get_ancestors(self, and_self=False) -> set:
+        ancestors = set()
+        explore = list(self.bases.all())
+        while explore:
+            current = explore.pop()
+            if current.pk not in ancestors:
+                ancestors.add(current.pk)
+                explore.extend(current.bases.all())
+        if and_self:
+            ancestors.add(self.pk)
+        return ancestors
+
+    def get_descendants(self, and_self=False) -> set:
+        descendants = set()
+        explore = list(self.subclasses.all())
+        while explore:
+            current = explore.pop()
+            if current.pk not in descendants:
+                descendants.add(current.pk)
+                explore.extend(current.subclasses.all())
+        if and_self:
+            descendants.add(self.pk)
+        return descendants
+
+    def get_attributes(self, **filters):
+        attributes = self.attributes.model.objects.filter(
+            product_class__in=self.get_ancestors(and_self=True),
+            **filters
+        ).distinct()
+        return attributes
 
 
 class ProductClassRelation(models.Model):
