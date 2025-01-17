@@ -210,7 +210,7 @@ LOGGING = {
 
         'logfile': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'log' / 'debug.log',
+            'filename': BASE_DIR / 'logs' / 'debug.log',
             'formatter': 'multiline',
             'mode': 'a',
             'maxBytes': 7000,

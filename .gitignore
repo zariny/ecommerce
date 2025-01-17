@@ -1,5 +1,6 @@
 .venv/
 .idea/
-sandbox/db.sqlite3
 __pycache__
-log/
+sandbox/db.sqlite3
+*.log*
+lab*
