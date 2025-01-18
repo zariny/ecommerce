@@ -30,6 +30,11 @@ class ReverseStartsWithLookup(models.lookups.StartsWith):
 models.Field.register_lookup(ReverseStartsWithLookup, "rstartswith")
 
 
+class CategoryQuerySet(models.QuerySet):
+    def browsable(self):
+        return self.filter(is_public=True, ancestors_are_public=True)
+
+
 class Category(MP_Node, BaseSeoModel, ModelWithDescription):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, auto_created="name", allow_unicode=True)
@@ -39,6 +44,8 @@ class Category(MP_Node, BaseSeoModel, ModelWithDescription):
 
     is_public = models.BooleanField(default=True)
     ancestors_are_public = models.BooleanField(default=True)
+
+    objects = CategoryQuerySet.as_manager()
 
     class Meta:
         indexes = (
