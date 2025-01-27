@@ -6,6 +6,7 @@ from .fields import DynamicValueField
 from .validation import validate_no_cycles
 from .exceptions import CycleInheritanceError
 from .managers import ProductQuerySet
+from .attr_container import ProductAttributeContainer
 
 
 class ProductClass(ModelWithMetadata):
@@ -112,6 +113,10 @@ class Product(BaseSeoModel, ModelWithDescription):
         app_label = "products"
         ordering = ("-updated_at",)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attr = ProductAttributeContainer(self)
+
     def __str__(self):
         return self.title or self.slug
 
@@ -122,6 +127,11 @@ class Product(BaseSeoModel, ModelWithDescription):
         super().clean()
         if self.product_type.abstract:
             raise ValidationError("Abstract product type %s can not have any product." % self.product_type)
+
+    def refresh_from_db(self, using=None, fields=None, from_queryset=None):
+        result = super().refresh_from_db(using, fields, from_queryset)
+        self.attr.invalidate()
+        return result
 
 
 class ProductAttribute(models.Model):
