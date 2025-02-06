@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
 from src.core.models import BaseSeoModel, ModelWithDescription, TranslationModel
-from treebeard.mp_tree import MP_Node
+from treebeard.mp_tree import MP_Node, MP_NodeQuerySet
 
 
 class ReverseStartsWithLookup(models.lookups.StartsWith):
@@ -30,9 +30,10 @@ class ReverseStartsWithLookup(models.lookups.StartsWith):
 models.Field.register_lookup(ReverseStartsWithLookup, "rstartswith")
 
 
-class CategoryQuerySet(models.QuerySet):
+class CategoryQuerySet(MP_NodeQuerySet):
     def browsable(self):
         return self.filter(is_public=True, ancestors_are_public=True)
+
 
 
 class Category(MP_Node, BaseSeoModel, ModelWithDescription):
