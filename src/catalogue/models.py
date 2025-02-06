@@ -124,3 +124,18 @@ class CategoryTranslation(TranslationModel):
             )
         app_label = "catalogue"
         unique_together = (("language_code", "category"),)
+
+
+class ProductCategory(models.Model):
+    category = models.ForeignKey("catalogue.Category", on_delete=models.CASCADE, related_name="product")
+    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="category")
+
+    class Meta:
+        app_label = "catalogue"
+        unique_together = (("category", "product"),)
+        ordering = ("product", "category")
+        verbose_name = "Product category"
+        verbose_name_plural = "Product categories"
+
+    def __str__(self):
+        return "%s is in the %s category" % (self.product, self.category)
