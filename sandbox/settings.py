@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'treebeard',
     'debug_toolbar',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -230,3 +231,9 @@ if env("LOGGING_QUERIES", default=False):
             }
         }
     )
+
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
