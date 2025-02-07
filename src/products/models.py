@@ -104,6 +104,11 @@ class Product(BaseSeoModel, ModelWithDescription):
     slug = models.SlugField(max_length=255, unique=True, allow_unicode=True, auto_created="title", db_index=True)
     is_public = models.BooleanField(default=True)
     attributes = models.ManyToManyField("products.ProductAttribute", through="products.ProductAttributeValue")
+    categories = models.ManyToManyField(
+        "catalogue.Category",
+        through="catalogue.ProductCategory",
+        related_name="products"
+    )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
