@@ -2,6 +2,7 @@ from django.contrib import admin
 from . import models
 from .forms import ProductAttributeValueAdminForm
 from core.admin import AbstractPieChartModelAdmin
+from catalogue.models import ProductCategory
 
 
 class IsPublicFilter(admin.SimpleListFilter):
@@ -37,6 +38,38 @@ class IsRequireFilter(admin.SimpleListFilter):
         elif self.value() == "no":
             return queryset.filter(require=False)
 
+class IsAbstraction(admin.SimpleListFilter):
+    title = "Is Abstract Class"
+    parameter_name = "abstract"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "abstract"),
+            ("no", "not abstract")
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(abstract=True)
+        elif self.value() == "no":
+            return queryset.filter(abstract=False)
+
+class IsRequiredShipping(admin.SimpleListFilter):
+    title = "Is Required Shipping"
+    parameter_name = "required-shipping"
+
+    def lookups(self, request, model_admin):
+        return [
+            ("yes", "required"),
+            ("no", "not required")
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.filter(require_shipping=True)
+        elif self.value() == "no":
+            return queryset.filter(require_shipping=False)
+
 
 class ProductAttributeValueInline(admin.TabularInline):
     model = models.ProductAttributeValue
@@ -54,13 +87,18 @@ class ProductClassRelationInline(admin.TabularInline):
     fk_name = "subclass"
     extra = 1
 
+class ProductCategoryInline(admin.StackedInline):
+    model = ProductCategory
+    fk_name = "product"
+    extra = 1
+
 
 @admin.register(models.Product)
 class ProductAdmin(AbstractPieChartModelAdmin):
     list_display = ("title", "is_public", "updated_at")
     search_fields = ("title",)
     list_filter = (IsPublicFilter,)
-    inlines = (ProductAttributeValueInline,)
+    inlines = (ProductCategoryInline, ProductAttributeValueInline)
 
 
 @admin.register(models.ProductAttributeValue)
@@ -79,9 +117,10 @@ class ProductAttributeAdmin(AbstractPieChartModelAdmin):
 
 
 @admin.register(models.ProductClass)
-class ProductClassAdmin(admin.ModelAdmin):
+class ProductClassAdmin(AbstractPieChartModelAdmin):
     list_display = ("title", "abstract", "require_shipping", "track_stock")
     inlines = (ProductClassRelationInline, ProductAttributeInline)
+    list_filter = (IsAbstraction, IsRequiredShipping,)
 
 
 admin.site.register(models.ProductClassRelation)
