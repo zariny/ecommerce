@@ -1,5 +1,6 @@
 from rest_framework import generics
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.filters import SearchFilter
 from django.db.models import Prefetch
 from django_filters import rest_framework as filters
 from catalogue.models import Category
@@ -30,6 +31,7 @@ class ProductList(generics.ListAPIView):
     API endpoint for retrieving a paginated list of public products.
 
     - Supports filtering by category slug.
+    - And searching on (title and slug) fields
     - Uses limit-offset pagination with a default limit of 10.
 
     **Query Parameters:**
@@ -39,9 +41,10 @@ class ProductList(generics.ListAPIView):
     """
     queryset = models.Product.objects.filter(is_public=True).only("pk", "title", "slug")
     serializer_class = ProductListSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter)
     filterset_class = ProductFilterByCategory
     pagination_class = ProductPagination
+    search_fields = ("title", "slug")
 
 
 class ProductDetail(generics.RetrieveAPIView):
