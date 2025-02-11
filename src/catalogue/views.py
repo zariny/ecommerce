@@ -12,7 +12,7 @@ class CategoryPagination(LimitOffsetPagination):
     max_limit = 30
 
 
-class CategoyRootFilter(filters.FilterSet):
+class CategoryRootFilter(filters.FilterSet):
     root = filters.BooleanFilter(method="root_filter")
 
     class Meta:
@@ -36,7 +36,7 @@ class CategoryList(generics.ListAPIView):
     ).order_by("path")
     serializer_class = CategoryListSerializer
     filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
-    filterset_class = CategoyRootFilter
+    filterset_class = CategoryRootFilter
     pagination_class = CategoryPagination
     search_fields = ("name", "slug")
     ordering_fields = ("path", "depth")
