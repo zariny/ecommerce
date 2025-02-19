@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import sys
 import environ
+from datetime import timedelta
 from pathlib import Path
 
 
@@ -60,6 +61,7 @@ INSTALLED_APPS = [
 
     # third-party apps
     'rest_framework',
+    'rest_framework_simplejwt',
     'django_filters',
     'treebeard',
     'debug_toolbar',
@@ -237,4 +239,10 @@ if env("LOGGING_QUERIES", default=False):
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=4),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
