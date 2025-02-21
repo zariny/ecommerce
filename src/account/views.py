@@ -64,3 +64,34 @@ class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMi
         response.delete_cookie("refresh_token")
         response.delete_cookie("expiry_date")
         return response
+
+
+class UserRegistrationView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
+    serializer_class = serializers.UserRegistrationSerializer
+    permission_classes = (permissions.AllowAny,)
+    def post(self, request):
+        serdata = self.serializer_class(data=request.data)
+        serdata.is_valid(raise_exception=True)
+        user = serdata.create(serdata.validated_data)
+        response = Response({"email": serdata.data["email"]}, status.HTTP_201_CREATED)
+        refresh_token = RefreshToken.for_user(user)
+        self.set_auth_tokens(response, refresh_token)
+        return response
+
+
+class TokenRefreshView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
+    def head(self, request):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        if not refresh_token:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            refresh_token = RefreshToken(refresh_token)
+            access_token = refresh_token.access_token
+
+            response = Response({"message": "Access token refreshed"}, status=status.HTTP_200_OK)
+            self.set_access_token(response, access_token)
+            return response
+        except TokenError:
+            return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
