@@ -38,6 +38,44 @@ class SetAuthenticationCookiesMixin:
 
 
 class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
+    """
+    User Authentication View.
+    (POST) and (DELETE)
+    This view handles user login and logout.
+
+    POST:
+        Authenticates a user based on email and password.
+        Returns a 200 OK response with a success message and sets authentication cookies
+        (access_token, refresh_token, expiry_date) upon successful authentication.
+        Returns a 401 Unauthorized response if authentication fails.
+
+        Request body (JSON):
+            - email (string, required): User's email address.
+            - password (string, required): User's password.
+
+        Response (200 OK):
+            - message (string): user email
+
+        Response (401 Unauthorized):
+            - detail (string): "No active account found with the given credentials"
+
+    DELETE:
+        Logs out the user by deleting the authentication cookies.
+        Returns a 200 OK response with a success message.
+
+        Request body: None
+
+        Response (200 OK):
+            - message (string): "Authentication tokens has been destroyed."
+
+    Authentication:
+        This endpoint does not require any authentication to be accessed.
+
+    Cookies:
+        - access_token (HTTPOnly):  Short-lived access token for API authorization.
+        - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+    """
     permission_classes = (permissions.AllowAny,)
     serializer_class = serializers.UserAuthenticationSerializer
 
@@ -51,7 +89,7 @@ class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMi
         user = authenticate(email=serdata.data["email"], password=serdata.data["password"])
         if user is not None and user.is_active:
             refresh_token = RefreshToken.for_user(user)
-            response = Response({"message": "tokens has been set successfully"}, status=status.HTTP_200_OK)
+            response = Response({"email": serdata.data["email"]}, status=status.HTTP_200_OK)
             self.set_auth_tokens(response, refresh_token)
             return response
         else:
@@ -67,6 +105,28 @@ class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMi
 
 
 class UserRegistrationView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
+    """
+    User Registration View.
+    (POST) This view handles user registration.
+        Creates a new user account.
+        Returns a 201 Created response with the user's email and sets authentication cookies
+        (access_token, refresh_token, expiry_date) upon successful registration.
+
+        Request body (JSON):
+            - email (string, required): User's email address.
+            - password (string, required): User's password.
+
+        Response (201 Created):
+            - email (string): The registered user's email address.
+
+    Authentication:
+        This endpoint does not require any authentication to be accessed.
+
+    Cookies:
+        - access_token (HTTPOnly):  Short-lived access token for API authorization.
+        - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+    """
     serializer_class = serializers.UserRegistrationSerializer
     permission_classes = (permissions.AllowAny,)
     def post(self, request):
@@ -80,6 +140,31 @@ class UserRegistrationView(generics.GenericAPIView, SetAuthenticationCookiesMixi
 
 
 class TokenRefreshView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
+    """
+    Token Refresh View.
+    (HEAD)
+    This view handles refreshing access tokens using a refresh token.
+
+    Retrieves the refresh token from the `refresh_token` cookie.
+        If the refresh token is valid, it generates a new access token and sets it in the `access_token` cookie.
+        Returns a 200 OK response.
+        Returns a 401 Unauthorized response if the refresh token is invalid or missing.
+
+        Request body: None
+
+        Response (200 OK):
+            - message (string): "Access token refreshed"
+
+        Response (401 Unauthorized):
+            - detail (string): "Invalid or expired refresh token"
+
+    Authentication:
+        This endpoint relies on the `refresh_token` cookie for authentication.
+    Cookies:
+        - access_token (HTTPOnly):  Short-lived access token for API authorization.
+        - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+    """
     def head(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
 
