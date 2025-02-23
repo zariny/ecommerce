@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from rest_framework.pagination import LimitOffsetPagination
 
-# Create your views here.
+
+class ListLimitOffsetPagination(LimitOffsetPagination):
+    default_limit = 10
+    max_limit = 30
