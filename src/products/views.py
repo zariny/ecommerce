@@ -1,10 +1,10 @@
 from rest_framework import generics
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.filters import SearchFilter
 from django.db.models import Prefetch
 from django_filters import rest_framework as filters
+from core.views import ListLimitOffsetPagination
 from catalogue.models import Category
-from .serializers import ProductListSerializer, ProductDetailSerializer
+from . import serializers
 from . import models
 
 
@@ -21,11 +21,6 @@ class ProductFilterByCategory(filters.FilterSet):
         fields = ("category",)
 
 
-class ProductPagination(LimitOffsetPagination):
-    default_limit = 10
-    max_limit = 30
-
-
 class ProductList(generics.ListAPIView):
     """
     API endpoint for retrieving a paginated list of public products.
@@ -40,10 +35,10 @@ class ProductList(generics.ListAPIView):
     - `category`: Filter by category slug (case-insensitive, partial matching)
     """
     queryset = models.Product.objects.filter(is_public=True).only("pk", "title", "slug")
-    serializer_class = ProductListSerializer
+    serializer_class = serializers.ProductListSerializer
     filter_backends = (filters.DjangoFilterBackend, SearchFilter)
     filterset_class = ProductFilterByCategory
-    pagination_class = ProductPagination
+    pagination_class = ListLimitOffsetPagination
     search_fields = ("title", "slug")
 
 
@@ -91,5 +86,5 @@ class ProductDetail(generics.RetrieveAPIView):
             to_attr="prefetched_categories",
         )
     )
-    serializer_class = ProductDetailSerializer
+    serializer_class = serializers.ProductDetailSerializer
     lookup_field = "slug"
