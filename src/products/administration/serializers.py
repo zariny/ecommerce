@@ -39,3 +39,35 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
             categories.append({"pk": category.pk, "name": category.name, "is_public": category.is_public})
         representation["categories"] = categories
         return representation
+
+
+class ProductAttributeAdminSerializer(serializers.ModelSerializer):
+    product_class = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductClass.objects.all(), many=True, required=False, write_only=True,
+    )
+
+    class Meta:
+        model = models.ProductAttribute
+        fields = "__all__"
+        extra_kwargs ={
+            "require": {"write_only": True},
+            "slug": {"write_only": True},
+        }
+
+
+class ProductAttributeDetailAdminSerializer(serializers.ModelSerializer):
+    product_class = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductClass.objects.all(), write_only=True, many=True, required=False
+    )
+
+    class Meta:
+        model = models.ProductAttribute
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        product_classes = []
+        for product_class in instance.product_class.only("pk", "title"):
+            product_classes.append({"pk": product_class.pk, "title": product_class.title})
+        representation["product_class"] = product_classes
+        return representation

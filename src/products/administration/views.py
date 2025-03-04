@@ -65,3 +65,21 @@ class ProductRetrieveUpdateAdmin(generics.RetrieveUpdateAPIView):
         "product_type__title", "product_type__slug"
     )
     serializer_class = serializers.ProductDetailAdminSerializer
+
+
+class ProductAttributeListCreateAdmin(generics.ListCreateAPIView):
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminSafeOrModelLvlPermission,)
+    queryset = models.ProductAttribute.objects.only("pk", "name", "slug", "value_type")
+    serializer_class = serializers.ProductAttributeAdminSerializer
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter)
+    pagination_class = ListLimitOffsetPagination
+    filterset_fields = ("require", "value_type")
+    search_fields = ("slug", "name")
+
+
+class ProductAttributeDetailAdmin(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminSafeOrModelLvlPermission,)
+    queryset = models.ProductAttribute.objects.all()
+    serializer_class = serializers.ProductAttributeDetailAdminSerializer
