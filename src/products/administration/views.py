@@ -1,11 +1,9 @@
-from django.db.models import Prefetch
 from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
 from core.authenticate import JWTCookiesBaseAuthentication
 from core.permissions import AdminSafeOrModelLvlPermission
 from core.views import ListLimitOffsetPagination
-from catalogue.models import Category
 from .. import models
 from . import serializers
 
@@ -40,7 +38,7 @@ class ProductListCreateAdmin(generics.ListCreateAPIView):
     authentication_classes = (JWTCookiesBaseAuthentication,)
     permission_classes = (AdminSafeOrModelLvlPermission,)
     queryset = models.Product.objects.only("pk", "title", "slug", "is_public", "updated_at")
-    serializer_class = serializers.ProductListCreateAdminSerializer
+    serializer_class = serializers.ProductAdminSerializer
     filter_backends = (filters.DjangoFilterBackend, SearchFilter)
     filterset_class = ProductFilterByCategoryAdmin
     pagination_class = ListLimitOffsetPagination
@@ -65,12 +63,5 @@ class ProductRetrieveUpdateAdmin(generics.RetrieveUpdateAPIView):
     ).only(
         "pk", "title", "slug", "is_public", "description", "meta_title", "meta_description", "created_at", "updated_at",
         "product_type__title", "product_type__slug"
-    ).prefetch_related(
-        Prefetch(
-            "categories",
-            queryset=Category.objects.only("pk", "name", "slug", "is_public"),
-            to_attr="prefetched_categories",
-        )
     )
     serializer_class = serializers.ProductDetailAdminSerializer
-    lookup_field = "slug"
