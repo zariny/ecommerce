@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
+from rest_framework.exceptions import ValidationError as RestValidationError
 from rest_framework import serializers
 from catalogue.models import Category
 from .. import models
@@ -11,7 +13,25 @@ class ProductAdminSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailAdminSerializer(serializers.ModelSerializer):
+    class ProductAttributeValueSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = models.ProductAttributeValue
+            fields  = ("attribute", "value")
+
+        def validate(self, attrs):
+            value = attrs.pop("value")
+            field = models.ProductAttributeValue._meta.get_field("value")
+            try:
+                value = field.clean(value=value, datatype=attrs.get("attribute").value_type, model_instance=None)
+            except DjangoValidationError as e:
+                message = {"attribute": attrs["attribute"].pk, "value": str(e)}
+                raise RestValidationError(message)
+            attrs["value"] = value
+            return super().validate(attrs)
+
+
     product_type = serializers.SerializerMethodField()
+    attribute_values = ProductAttributeValueSerializer(many=True, required=False, write_only=True)
     categories = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
         many=True,
@@ -23,7 +43,7 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
         model = models.Product
         fields = (
             "title", "slug", "is_public", "description", "meta_title", "meta_description", "created_at", "updated_at",
-            "product_type", "categories"
+            "product_type", "categories", "attribute_values"
         )
 
     def get_product_type(self, obj) -> Dict | None:
@@ -35,10 +55,30 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
         representation =  super().to_representation(instance)
 
         categories = list()
-        for category in instance.categories.all().only("pk", "name", "is_public"):
-            categories.append({"pk": category.pk, "name": category.name, "is_public": category.is_public})
+        for i in instance.categories.all().only("name", "is_public"):
+            categories.append({"name": i.name, "is_public": i.is_public})
         representation["categories"] = categories
+
+        attribute_values = list()
+        for attr_val in instance.attr.all():
+            attribute_values.append(
+                {
+                    "attribute": attr_val.attribute.pk,
+                    "name": attr_val.attribute.name,
+                    "value": attr_val.value,
+                    "value_type": attr_val.value_type
+                }
+            )
+
+        representation["attribute_values"] = attribute_values
         return representation
+
+    def update(self, instance, validated_data):
+        attribute_values = validated_data.pop("attribute_values", [])
+        instance = super().update(instance, validated_data)
+        if attribute_values:
+            ...
+        return instance
 
 
 class ProductAttributeAdminSerializer(serializers.ModelSerializer):
