@@ -62,7 +62,7 @@ class ProductRetrieveUpdateAdmin(generics.RetrieveUpdateAPIView):
         "product_type"
     ).only(
         "pk", "title", "slug", "is_public", "description", "meta_title", "meta_description", "created_at", "updated_at",
-        "product_type__title", "product_type__slug"
+        "product_type__title"
     )
     serializer_class = serializers.ProductDetailAdminSerializer
 
@@ -83,3 +83,21 @@ class ProductAttributeDetailAdmin(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = (AdminSafeOrModelLvlPermission,)
     queryset = models.ProductAttribute.objects.all()
     serializer_class = serializers.ProductAttributeDetailAdminSerializer
+
+
+class ProductClassListCreateAdmin(generics.ListCreateAPIView):
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminSafeOrModelLvlPermission,)
+    queryset = models.ProductClass.objects.all()
+    serializer_class = serializers.ProductClassAdminSerializer
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter)
+    pagination_class = ListLimitOffsetPagination
+    filterset_fields = ("require_shipping", "track_stock", "abstract")
+    search_fields = ("slug", "title")
+
+
+class ProductClassDetailAdmin(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminSafeOrModelLvlPermission,)
+    queryset = models.ProductClass.objects.all()
+    serializer_class = serializers.ProductClassDetailAdminSerializer
