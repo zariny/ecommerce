@@ -3,16 +3,9 @@ from rest_framework.exceptions import ValidationError as RestValidationError
 from rest_framework import serializers
 from catalogue.models import Category
 from .. import models
-from typing import Dict
 
 
-class ProductAdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = models.Product
-        fields = ("pk", "title", "slug", "is_public", "updated_at")
-
-
-class ProductDetailAdminSerializer(serializers.ModelSerializer):
+class BaseProductAdminSerializer(serializers.ModelSerializer):
     class ProductAttributeValueSerializer(serializers.ModelSerializer):
         class Meta:
             model = models.ProductAttributeValue
@@ -20,7 +13,7 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
 
         def validate(self, attrs):
             value = attrs.pop("value")
-            field = models.ProductAttributeValue._meta.get_field("value")
+            field = self.Meta.model._meta.get_field('value')
             try:
                 value = field.clean(value=value, datatype=attrs.get("attribute").value_type, model_instance=None)
             except DjangoValidationError as e:
@@ -30,8 +23,13 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
             return super().validate(attrs)
 
 
-    product_type = serializers.SerializerMethodField()
-    attribute_values = ProductAttributeValueSerializer(many=True, required=False, write_only=True)
+    attributes = ProductAttributeValueSerializer(many=True, required=False, write_only=True)
+    product_type = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductClass.objects.all(),
+        many=False,
+        write_only=True,
+        required=True
+    )
     categories = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
         many=True,
@@ -39,21 +37,26 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
         required=False
     )
 
+
+class ProductAdminSerializer(BaseProductAdminSerializer):
     class Meta:
         model = models.Product
-        fields = (
-            "title", "slug", "is_public", "description", "meta_title", "meta_description", "created_at", "updated_at",
-            "product_type", "categories", "attribute_values"
-        )
+        exclude = ("attributes", "created_at")
+        extra_kwargs = {
+            "meta_title": {"write_only": True},
+            "meta_description": {"write_only": True},
+            "description": {"write_only": True}
+        }
 
-    def get_product_type(self, obj) -> Dict | None:
-        if obj.product_type:
-            return {"title": obj.product_type.title, "slug": obj.product_type.slug}
-        return None
+
+class ProductDetailAdminSerializer(BaseProductAdminSerializer):
+    class Meta:
+        model = models.Product
+        fields = "__all__"
 
     def to_representation(self, instance):
         representation =  super().to_representation(instance)
-
+        representation["product_type"] = {"pk": instance.product_type.pk, "title": instance.product_type.title}
         categories = list()
         for i in instance.categories.all().only("name", "is_public"):
             categories.append({"name": i.name, "is_public": i.is_public})
@@ -77,15 +80,18 @@ class ProductDetailAdminSerializer(serializers.ModelSerializer):
         attribute_values = validated_data.pop("attribute_values", [])
         instance = super().update(instance, validated_data)
         if attribute_values:
-            ...
+            instance.attr._dirty = attribute_values
+            instance.attr.save()
         return instance
 
 
-class ProductAttributeAdminSerializer(serializers.ModelSerializer):
+class BaseProductAttributeAdminSerializer(serializers.ModelSerializer):
     product_class = serializers.PrimaryKeyRelatedField(
         queryset=models.ProductClass.objects.all(), many=True, required=False, write_only=True,
     )
 
+
+class ProductAttributeAdminSerializer(BaseProductAttributeAdminSerializer):
     class Meta:
         model = models.ProductAttribute
         fields = "__all__"
@@ -95,11 +101,7 @@ class ProductAttributeAdminSerializer(serializers.ModelSerializer):
         }
 
 
-class ProductAttributeDetailAdminSerializer(serializers.ModelSerializer):
-    product_class = serializers.PrimaryKeyRelatedField(
-        queryset=models.ProductClass.objects.all(), write_only=True, many=True, required=False
-    )
-
+class ProductAttributeDetailAdminSerializer(BaseProductAttributeAdminSerializer):
     class Meta:
         model = models.ProductAttribute
         fields = "__all__"
@@ -111,3 +113,36 @@ class ProductAttributeDetailAdminSerializer(serializers.ModelSerializer):
             product_classes.append({"pk": product_class.pk, "title": product_class.title})
         representation["product_class"] = product_classes
         return representation
+
+
+class BaseProductClassAdminSerializer(serializers.ModelSerializer):
+    bases = serializers.PrimaryKeyRelatedField(
+        queryset=models.ProductClass.objects.all(),
+        many=True,
+        required=False,
+        write_only=True
+    )
+
+
+class ProductClassAdminSerializer(BaseProductClassAdminSerializer):
+    class Meta:
+        model = models.ProductClass
+        fields = "__all__"
+        extra_kwargs = {
+            "metadata": {"write_only": True},
+            "slug": {"write_only": True},
+        }
+
+
+class ProductClassDetailAdminSerializer(BaseProductClassAdminSerializer):
+    class Meta:
+        model = models.ProductClass
+        fields = "__all__"
+
+    def to_representation(self, instance):
+        representaion = super().to_representation(instance)
+        bases = []
+        for product_class in instance.bases.only("pk", "title", "abstract"):
+            bases.append({"pk": product_class.pk, "title": product_class.title, "abstract": product_class.abstract})
+        representaion["bases"] = bases
+        return representaion

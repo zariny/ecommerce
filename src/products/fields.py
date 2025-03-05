@@ -4,8 +4,9 @@ from .utils import proper_field
 
 
 class DynamicValueField(models.JSONField):
-    def clean(self, value, model_instance):
-        datatype = model_instance.data_type
+    def clean(self, value, model_instance, datatype=None):
+        if datatype is None:
+            datatype = model_instance.data_type
         field = proper_field(datatype)
 
         try:
