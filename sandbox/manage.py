@@ -15,6 +15,9 @@ def main():
             "available on your PYTHONPATH environment variable? Did you "
             "forget to activate a virtual environment?"
         ) from exc
+
+    if "runserver" in sys.argv:
+        print("Starting Django server... (>>> Use http://127.0.0.1:8000/ to access)")
     execute_from_command_line(sys.argv)
 
 

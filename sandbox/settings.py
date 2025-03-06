@@ -111,7 +111,7 @@ WSGI_APPLICATION = 'wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": env("DATABASE_ENGINE", default="django.db.backends.sqlite3"),
-        "NAME": env("DATABASE_NAME", default="db.sqlite3"),
+        "NAME": env("DATABASE_NAME", default=BASE_DIR / "sandbox" / "sqlite" / "db.sqlite3"),
         "USER": env("DATABASE_USER", default=None),
         "PASSWORD": env("DATABASE_PASSWORD", default=None),
         "HOST": env("DATABASE_HOST", default=None),
@@ -243,6 +243,6 @@ REST_FRAMEWORK = {
 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=4),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
