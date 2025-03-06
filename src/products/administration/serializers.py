@@ -39,6 +39,7 @@ class BaseProductAdminSerializer(serializers.ModelSerializer):
 
 
 class ProductAdminSerializer(BaseProductAdminSerializer):
+    attributes = None
     class Meta:
         model = models.Product
         exclude = ("attributes", "created_at")
