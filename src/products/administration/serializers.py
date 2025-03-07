@@ -3,6 +3,9 @@ from rest_framework.exceptions import ValidationError as RestValidationError
 from rest_framework import serializers
 from catalogue.models import Category
 from .. import models
+from typing import List
+from ..exceptions import CycleInheritanceError
+from ..models import ProductClassRelation, ProductClass
 
 
 class BaseProductAdminSerializer(serializers.ModelSerializer):
@@ -37,15 +40,23 @@ class BaseProductAdminSerializer(serializers.ModelSerializer):
         required=False
     )
 
+    # def validate_product_type(self, value):
+    #     if value.abstract:
+    #         raise RestValidationError("Abstract product type %s can not have any product." % value)
+    #     return value
+
 
 class ProductAdminSerializer(BaseProductAdminSerializer):
+    attributes=None
     class Meta:
         model = models.Product
         exclude = ("attributes", "created_at")
         extra_kwargs = {
+            "slug": {"write_only": True},
             "meta_title": {"write_only": True},
             "meta_description": {"write_only": True},
-            "description": {"write_only": True}
+            "description": {"write_only": True},
+            "metadata": {"write_only": True},
         }
 
 
@@ -120,8 +131,36 @@ class BaseProductClassAdminSerializer(serializers.ModelSerializer):
         queryset=models.ProductClass.objects.all(),
         many=True,
         required=False,
-        write_only=True
+        write_only=True,
     )
+
+    def update(self, instance, valiated_data):
+        bases = valiated_data.pop("bases", [])
+        try:
+            for base in bases:
+                validate_no_cycles(base_product_kls=base, sub_product_kls=instance)
+        except CycleInheritanceError as e:
+            raise RestValidationError({"bases": e.message})
+        super().update(instance, valiated_data)
+        instance.bases.set(bases)
+        return instance
+
+    def create(self, vliated_data):
+        bases = vliated_data.pop("bases", [])
+        instance = super().create(vliated_data)
+        self.create_relaion(instance, bases)
+        return instance
+
+    def create_relaion(self, instance: ProductClass, bases: List[ProductClass]):
+        relation_objects = list()
+        for base in bases:
+            relation_obj = models.ProductClassRelation(subclass=instance, base=base)
+            try:
+                relation_obj.cycle_relation_validation()
+            except DjangoValidationError as e:
+                raise RestValidationError({"bases": str(e)})
+            relation_objects.append(relation_obj)
+        models.ProductClassRelation.objects.bulk_create(relation_objects, batch_size=100)
 
 
 class ProductClassAdminSerializer(BaseProductClassAdminSerializer):
