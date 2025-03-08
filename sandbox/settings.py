@@ -188,7 +188,9 @@ INTERNAL_IPS = [
 # LOGGING
 import logging
 
-
+# Ensure logs directory exists
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(parents=True, exist_ok=True)  # Creates 'logs/' if it doesn't exist
 class MultiLineFormatter(logging.Formatter): # TODO Bad practice
     def format(self, record):
         original_message = super().format(record)
