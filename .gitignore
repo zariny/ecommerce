@@ -4,3 +4,4 @@ __pycache__
 sandbox/db.sqlite3
 *.log*
 lab*
+db.sqlite3
