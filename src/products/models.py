@@ -79,23 +79,23 @@ class ProductClassRelation(models.Model):
     def __str__(self):
         return "%s inherits from %s" % (self.subclass, self.base)
 
-    def clean(self):
-        super().clean()
+    def cycle_relation_validation(self) -> None:
         if self.base == self.subclass:
             raise ValidationError("Self-inheritance is not allowed.")
 
-        self._check_reverse_relation()
+        # Any two instances of the ProductClass should have only one relationship with each other
+        if self.base.pk and self.subclass.pk:
+            if type(self)._default_manager.filter(base=self.subclass, subclass=self.base).exists():
+                raise ValidationError("The inverse of this relationship has already been stored.")
 
         try:
             validate_no_cycles(base_product_kls=self.base, sub_product_kls=self.subclass)
         except CycleInheritanceError as e:
             raise ValidationError(message=e.message)
 
-    def _check_reverse_relation(self):
-        # Any two instances of the ProductClass should have only one relationship with each other.
-        if self.base.pk and self.subclass.pk:
-            if type(self)._default_manager.filter(base=self.subclass, subclass=self.base).exists():
-                raise ValidationError("The inverse of this relationship has already been stored.")
+    def clean(self):
+        super().clean()
+        self.cycle_relation_validation()
 
 
 class Product(BaseSeoModel, ModelWithDescription):
@@ -130,7 +130,7 @@ class Product(BaseSeoModel, ModelWithDescription):
 
     def clean(self):
         super().clean()
-        if self.product_type.abstract:
+        if self.product_type_id and self.product_type.abstract:
             raise ValidationError("Abstract product type %s can not have any product." % self.product_type)
 
     def refresh_from_db(self, using=None, fields=None, from_queryset=None):

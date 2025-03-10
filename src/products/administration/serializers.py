@@ -1,7 +1,9 @@
+from typing import List
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
 from rest_framework import serializers
 from catalogue.models import Category
+from ..exceptions import CycleInheritanceError
 from .. import models
 
 
@@ -37,16 +39,47 @@ class BaseProductAdminSerializer(serializers.ModelSerializer):
         required=False
     )
 
+    def update(self, instance, validated_data):
+        attribute_values = validated_data.pop("attributes", [])
+        instance = super().update(instance, validated_data)
+        if attribute_values:
+            instance.attr._dirty = attribute_values
+            instance.attr.save()
+        return instance
+
+    def create(self, validated_data):
+        attribute_values = validated_data.pop("attributes", [])
+        instance = models.Product.objects.create(**validated_data)
+        if attribute_values:
+            attribute_value_objects = list()
+            for attr_val in attribute_values:
+                attribute_value_objects.append(
+                    models.ProductAttributeValue(
+                        product=instance,
+                        attribute=attr_val["attribute"],
+                        value=attr_val["value"]
+                    )
+                )
+            models.ProductAttributeValue.objects.bulk_create(attribute_value_objects, batch_size=100)
+        return instance
+
+    def validate_product_type(self, value):
+        if value.abstract:
+            raise RestValidationError("Abstract product type %s can not have any product." % value)
+        return value
+
 
 class ProductAdminSerializer(BaseProductAdminSerializer):
-    attributes = None
     class Meta:
         model = models.Product
-        exclude = ("attributes", "created_at")
+        exclude = ("created_at",)
         extra_kwargs = {
+            "slug": {"write_only": True},
+            "attributes": {"write_only": True},
             "meta_title": {"write_only": True},
             "meta_description": {"write_only": True},
-            "description": {"write_only": True}
+            "description": {"write_only": True},
+            "metadata": {"write_only": True},
         }
 
 
@@ -74,16 +107,8 @@ class ProductDetailAdminSerializer(BaseProductAdminSerializer):
                 }
             )
 
-        representation["attribute_values"] = attribute_values
+        representation["attributes"] = attribute_values
         return representation
-
-    def update(self, instance, validated_data):
-        attribute_values = validated_data.pop("attribute_values", [])
-        instance = super().update(instance, validated_data)
-        if attribute_values:
-            instance.attr._dirty = attribute_values
-            instance.attr.save()
-        return instance
 
 
 class BaseProductAttributeAdminSerializer(serializers.ModelSerializer):
@@ -121,8 +146,36 @@ class BaseProductClassAdminSerializer(serializers.ModelSerializer):
         queryset=models.ProductClass.objects.all(),
         many=True,
         required=False,
-        write_only=True
+        write_only=True,
     )
+
+    def update(self, instance, valiated_data):
+        bases = valiated_data.pop("bases", [])
+        try:
+            for base in bases:
+                validate_no_cycles(base_product_kls=base, sub_product_kls=instance)
+        except CycleInheritanceError as e:
+            raise RestValidationError({"bases": e.message})
+        super().update(instance, valiated_data)
+        instance.bases.set(bases)
+        return instance
+
+    def create(self, vliated_data):
+        bases = vliated_data.pop("bases", [])
+        instance = super().create(vliated_data)
+        self.create_relaion(instance, bases)
+        return instance
+
+    def create_relaion(self, instance: models.ProductClass, bases: List[models.ProductClass]):
+        relation_objects = list()
+        for base in bases:
+            relation_obj = models.ProductClassRelation(subclass=instance, base=base)
+            try:
+                relation_obj.cycle_relation_validation()
+            except DjangoValidationError as e:
+                raise RestValidationError({"bases": str(e)})
+            relation_objects.append(relation_obj)
+        models.ProductClassRelation.objects.bulk_create(relation_objects, batch_size=100)
 
 
 class ProductClassAdminSerializer(BaseProductClassAdminSerializer):
