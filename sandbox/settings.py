@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-
 import sys
 import environ
 from datetime import timedelta
@@ -24,7 +23,7 @@ env = environ.Env(
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "src"))
-sys.path.append(str(BASE_DIR)) # -> ecommerce directory
+sys.path.append(str(BASE_DIR))  # -> ecommerce directory
 
 # Take environment variables from .env file
 environ.Env.read_env(BASE_DIR / ".env")
@@ -35,83 +34,103 @@ from core.languages import LANGUAGES as CORE_LANGUAGES
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-3&a@-m_y)^t7nm6w(bcbb!5ne6+4!__r%-1bj&5g)96$l+8qy*'
+SECRET_KEY = "django-insecure-3&a@-m_y)^t7nm6w(bcbb!5ne6+4!__r%-1bj&5g)96$l+8qy*"
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# CORS configuration
+CORS_ALLOWED_ORIGINS = env(
+    "CORS_ALLOWED_ORIGINS",
+    default=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+)  # env value example (split by Comma (,) )   http://localhost:3000,http://127.0.0.1:3000
+
+CORS_ALLOW_CREDENTIALS = True  # Allow cookies to be sent/received
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
     # apps
-    'account',
-    'catalogue',
-    'core',
-    'products',
-
+    "account",
+    "catalogue",
+    "core",
+    "products",
     # third-party apps
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'django_filters',
-    'treebeard',
-    'debug_toolbar',
-    'drf_spectacular',
+    "corsheaders",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "django_filters",
+    "treebeard",
+    "debug_toolbar",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'urls'
+
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'sandbox' / 'templates',
-            BASE_DIR / 'src' / 'templates',
-            ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [
+            BASE_DIR / "sandbox" / "templates",
+            BASE_DIR / "src" / "templates",
+        ],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'wsgi.application'
+WSGI_APPLICATION = "wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Get the database name from the environment variable
+DATABASE_NAME = env("DATABASE_NAME", default=None)
+
+# If DATABASE_NAME is not provided, use the default SQLite path
+if not DATABASE_NAME:
+    DATABASE_NAME = BASE_DIR / "sandbox" / "sqlite" / "db.sqlite3"
+    sqlite_folder = Path(DATABASE_NAME).parent
+
+    # If the folder does not exist, create it
+    if not sqlite_folder.exists():
+        sqlite_folder.mkdir(parents=True)
 DATABASES = {
     "default": {
         "ENGINE": env("DATABASE_ENGINE", default="django.db.backends.sqlite3"),
-        "NAME": env("DATABASE_NAME", default=BASE_DIR / "sandbox" / "sqlite" / "db.sqlite3"),
+        "NAME": DATABASE_NAME,
         "USER": env("DATABASE_USER", default=None),
         "PASSWORD": env("DATABASE_PASSWORD", default=None),
         "HOST": env("DATABASE_HOST", default=None),
@@ -124,7 +143,9 @@ DATABASES = {
 
 CACHES = {
     "default": {
-        "BACKEND": env("CACHE_BACKEND", default="django.core.cache.backends.locmem.LocMemCache"),
+        "BACKEND": env(
+            "CACHE_BACKEND", default="django.core.cache.backends.locmem.LocMemCache"
+        ),
         "LOCATION": env("CACHE_LOCATION", default=None),
         "TIMEOUT": env("CACHE_TIMEOUT", default=300),
     }
@@ -132,7 +153,7 @@ CACHES = {
 
 # User model
 
-AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = "account.User"
 
 
 # Password validation
@@ -140,16 +161,16 @@ AUTH_USER_MODEL = 'account.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -157,9 +178,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
-LANGUAGE_CODE = 'en'
+LANGUAGE_CODE = "en"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -169,13 +190,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 INTERNAL_IPS = [
@@ -189,56 +209,59 @@ INTERNAL_IPS = [
 import logging
 
 
-class MultiLineFormatter(logging.Formatter): # TODO Bad practice
+class MultiLineFormatter(logging.Formatter):  # TODO Bad practice
     def format(self, record):
         original_message = super().format(record)
         max_length = 140
-        lines = [original_message[i:i + max_length] for i in range(0, len(original_message), max_length)]
-        s = '\n'.join(lines)
+        lines = [
+            original_message[i : i + max_length]
+            for i in range(0, len(original_message), max_length)
+        ]
+        s = "\n".join(lines)
         return "%s \n" % s
 
+
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'multiline': {
-            '()': MultiLineFormatter,
-            'format': '[%(levelname)s]: %(message)s',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "multiline": {
+            "()": MultiLineFormatter,
+            "format": "[%(levelname)s]: %(message)s",
         },
     },
-
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
-
-        'logfile': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
-            'formatter': 'multiline',
-            'mode': 'a',
-            'maxBytes': 7000,
-            'backupCount': 2,
-            'delay': False
-        }
+        "logfile": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "debug.log",
+            "formatter": "multiline",
+            "mode": "a",
+            "maxBytes": 7000,
+            "backupCount": 2,
+            "delay": False,
+        },
     },
 }
 
 if env("LOGGING_QUERIES", default=False):
     LOGGING.setdefault(
-        'loggers', {
-            'django.db.backends': {
-                'level': 'DEBUG',
-                'handlers': ['logfile'],
-                'propagate': False,
+        "loggers",
+        {
+            "django.db.backends": {
+                "level": "DEBUG",
+                "handlers": ["logfile"],
+                "propagate": False,
             }
-        }
+        },
     )
 
 
 REST_FRAMEWORK = {
     # YOUR SETTINGS
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 
