@@ -2,5 +2,6 @@
 .idea/
 __pycache__
 sandbox/sqlite/db.sqlite3
+sandbox/db.sqlite3
 *.log*
 lab*
