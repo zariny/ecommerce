@@ -1,0 +1,2558 @@
+openapi: 3.0.3
+info:
+  title: ''
+  version: 0.0.0
+paths:
+  /api/admin/attribute/{id}/:
+    get:
+      operationId: admin_attribute_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+          description: ''
+    put:
+      operationId: admin_attribute_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+          description: ''
+    patch:
+      operationId: admin_attribute_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductAttributeDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductAttributeDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductAttributeDetailAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAttributeDetailAdmin'
+          description: ''
+    delete:
+      operationId: admin_attribute_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/attributes/:
+    get:
+      operationId: admin_attributes_list
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: require
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: value_type
+        schema:
+          type: string
+          enum:
+          - boolean
+          - charactor
+          - date
+          - datetime
+          - float
+          - integer
+          - time
+        description: |-
+          * `charactor` - Charactor
+          * `integer` - Integer
+          * `float` - Float
+          * `boolean` - True / False
+          * `date` - Date
+          * `datetime` - Date - Time
+          * `time` - Time
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductAttributeAdminList'
+          description: ''
+    post:
+      operationId: admin_attributes_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductAttributeAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAttributeAdmin'
+          description: ''
+  /api/admin/categories/:
+    get:
+      operationId: admin_categories_list
+      description: |-
+        View for listing and creating categories in a hierarchical structure.
+        **HTTP Methods:**
+        - GET: Retrieve a list of categories with nested children.
+        - POST: Create a new category with specified position and optional relative_to.
+
+        **Query Parameters (GET):**
+        - is_public (bool): Filter by public visibility.
+        - ancestors_are_public (bool): Filter by public ancestors.
+        - is_root (bool): Filter root categories (depth=1).
+        - child_of (int): Filter children of a specific category by ID.
+        - search (str): Search by slug or name.
+        - ordering (str): Order by 'path' or 'depth'.
+
+        **Request Body (POST):**
+        - name (str): Category name.
+        - position (str): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category (required unless position is 'root').
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON list of categories with fields like pk, name, is_public, and children (nested).
+
+        **Response (POST):**
+        - JSON object of the created category.
+      parameters:
+      - in: query
+        name: ancestors_are_public
+        schema:
+          type: boolean
+      - in: query
+        name: child_of
+        schema:
+          type: number
+        description: Child of
+      - in: query
+        name: is_public
+        schema:
+          type: boolean
+      - in: query
+        name: is_root
+        schema:
+          type: boolean
+        description: Is root category
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryAdminList'
+          description: ''
+    post:
+      operationId: admin_categories_create
+      description: |-
+        View for listing and creating categories in a hierarchical structure.
+        **HTTP Methods:**
+        - GET: Retrieve a list of categories with nested children.
+        - POST: Create a new category with specified position and optional relative_to.
+
+        **Query Parameters (GET):**
+        - is_public (bool): Filter by public visibility.
+        - ancestors_are_public (bool): Filter by public ancestors.
+        - is_root (bool): Filter root categories (depth=1).
+        - child_of (int): Filter children of a specific category by ID.
+        - search (str): Search by slug or name.
+        - ordering (str): Order by 'path' or 'depth'.
+
+        **Request Body (POST):**
+        - name (str): Category name.
+        - position (str): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category (required unless position is 'root').
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON list of categories with fields like pk, name, is_public, and children (nested).
+
+        **Response (POST):**
+        - JSON object of the created category.
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryAdmin'
+          description: ''
+  /api/admin/category/{id}/:
+    get:
+      operationId: admin_category_retrieve
+      description: |-
+        View for retrieving, updating, or deleting a single category.
+
+        **HTTP Methods:**
+        - GET: Retrieve details of a single category.
+        - PUT/PATCH: Update category details, including repositioning.
+        - DELETE: Remove the category.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category.
+
+        **Request Body (PUT/PATCH):**
+        - name (str, optional): Updated category name.
+        - position (str, optional): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category for repositioning.
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON object with category details, including computed 'position' and 'relative_to'.
+
+        **Response (PUT/PATCH):**
+        - JSON object of the updated category.
+
+        **Response (DELETE):**
+        - 204 No Content on success.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDeatilAdmin'
+          description: ''
+    put:
+      operationId: admin_category_update
+      description: |-
+        View for retrieving, updating, or deleting a single category.
+
+        **HTTP Methods:**
+        - GET: Retrieve details of a single category.
+        - PUT/PATCH: Update category details, including repositioning.
+        - DELETE: Remove the category.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category.
+
+        **Request Body (PUT/PATCH):**
+        - name (str, optional): Updated category name.
+        - position (str, optional): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category for repositioning.
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON object with category details, including computed 'position' and 'relative_to'.
+
+        **Response (PUT/PATCH):**
+        - JSON object of the updated category.
+
+        **Response (DELETE):**
+        - 204 No Content on success.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryDeatilAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryDeatilAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryDeatilAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDeatilAdmin'
+          description: ''
+    patch:
+      operationId: admin_category_partial_update
+      description: |-
+        View for retrieving, updating, or deleting a single category.
+
+        **HTTP Methods:**
+        - GET: Retrieve details of a single category.
+        - PUT/PATCH: Update category details, including repositioning.
+        - DELETE: Remove the category.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category.
+
+        **Request Body (PUT/PATCH):**
+        - name (str, optional): Updated category name.
+        - position (str, optional): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category for repositioning.
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON object with category details, including computed 'position' and 'relative_to'.
+
+        **Response (PUT/PATCH):**
+        - JSON object of the updated category.
+
+        **Response (DELETE):**
+        - 204 No Content on success.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryDeatilAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryDeatilAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryDeatilAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDeatilAdmin'
+          description: ''
+    delete:
+      operationId: admin_category_destroy
+      description: |-
+        View for retrieving, updating, or deleting a single category.
+
+        **HTTP Methods:**
+        - GET: Retrieve details of a single category.
+        - PUT/PATCH: Update category details, including repositioning.
+        - DELETE: Remove the category.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category.
+
+        **Request Body (PUT/PATCH):**
+        - name (str, optional): Updated category name.
+        - position (str, optional): One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category for repositioning.
+        - Other fields: slug, description, etc.
+
+        **Response (GET):**
+        - JSON object with category details, including computed 'position' and 'relative_to'.
+
+        **Response (PUT/PATCH):**
+        - JSON object of the updated category.
+
+        **Response (DELETE):**
+        - 204 No Content on success.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/category/move/{id}/:
+    put:
+      operationId: admin_category_move_update
+      description: |-
+        This specialized view is designed for reordering categories within the tree structure.
+        It accepts a category ID and updates its position relative to another category,
+        making it ideal for drag-and-drop interfaces in the frontend.
+
+        **HTTP Methods:**
+        - PUT/PATCH: Move the category to a new position.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category to move.
+
+        **Request Body (PUT/PATCH):**
+        - position (str): Required. One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category (required unless position is 'root').
+
+        **Response:**
+        - JSON object of the moved category with updated details.
+
+        **Errors:**
+        - 400 Bad Request: If position is invalid or relative_to is missing when required.
+
+        **Frontend Note:**
+        - Use this endpoint for drag-and-drop functionality. Refetch the category list after a successful move
+          to reflect the updated hierarchy.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryNodeMovementAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryNodeMovementAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryNodeMovementAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryNodeMovementAdmin'
+          description: ''
+    patch:
+      operationId: admin_category_move_partial_update
+      description: |-
+        This specialized view is designed for reordering categories within the tree structure.
+        It accepts a category ID and updates its position relative to another category,
+        making it ideal for drag-and-drop interfaces in the frontend.
+
+        **HTTP Methods:**
+        - PUT/PATCH: Move the category to a new position.
+
+        **URL Parameters:**
+        - pk (int): The primary key of the category to move.
+
+        **Request Body (PUT/PATCH):**
+        - position (str): Required. One of 'root', 'first_child_of', 'after', 'before'.
+        - relative_to (int, optional): ID of the reference category (required unless position is 'root').
+
+        **Response:**
+        - JSON object of the moved category with updated details.
+
+        **Errors:**
+        - 400 Bad Request: If position is invalid or relative_to is missing when required.
+
+        **Frontend Note:**
+        - Use this endpoint for drag-and-drop functionality. Refetch the category list after a successful move
+          to reflect the updated hierarchy.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryNodeMovementAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryNodeMovementAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryNodeMovementAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryNodeMovementAdmin'
+          description: ''
+  /api/admin/product/{id}/:
+    get:
+      operationId: admin_product_retrieve
+      description: |-
+        API view for retrieving and updating product details in the administration panel.
+        Supports retrieving product details, including related product type and prefetching categories.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            data: The base queryset with selected fields and prefetching.
+            lookup_field: The field used for lookup (slug).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailAdmin'
+          description: ''
+    put:
+      operationId: admin_product_update
+      description: |-
+        API view for retrieving and updating product details in the administration panel.
+        Supports retrieving product details, including related product type and prefetching categories.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            data: The base queryset with selected fields and prefetching.
+            lookup_field: The field used for lookup (slug).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductDetailAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailAdmin'
+          description: ''
+    patch:
+      operationId: admin_product_partial_update
+      description: |-
+        API view for retrieving and updating product details in the administration panel.
+        Supports retrieving product details, including related product type and prefetching categories.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            data: The base queryset with selected fields and prefetching.
+            lookup_field: The field used for lookup (slug).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductDetailAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailAdmin'
+          description: ''
+    delete:
+      operationId: admin_product_destroy
+      description: |-
+        API view for retrieving and updating product details in the administration panel.
+        Supports retrieving product details, including related product type and prefetching categories.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            data: The base queryset with selected fields and prefetching.
+            lookup_field: The field used for lookup (slug).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/productclass/{id}/:
+    get:
+      operationId: admin_productclass_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductClassDetailAdmin'
+          description: ''
+    put:
+      operationId: admin_productclass_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductClassDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductClassDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductClassDetailAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductClassDetailAdmin'
+          description: ''
+    patch:
+      operationId: admin_productclass_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProductClassDetailAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProductClassDetailAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProductClassDetailAdmin'
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductClassDetailAdmin'
+          description: ''
+    delete:
+      operationId: admin_productclass_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/productclasses/:
+    get:
+      operationId: admin_productclasses_list
+      parameters:
+      - in: query
+        name: abstract
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: query
+        name: require_shipping
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: track_stock
+        schema:
+          type: boolean
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductClassAdminList'
+          description: ''
+    post:
+      operationId: admin_productclasses_create
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductClassAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductClassAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductClassAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductClassAdmin'
+          description: ''
+  /api/admin/products/:
+    get:
+      operationId: admin_products_list
+      description: |-
+        API view for listing and creating products in the administration panel.
+
+        Provides authentication and permission controls for administration users.
+        Supports filtering, searching, and pagination.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            The base queryset selecting specific fields of Product: "pk", "title", "slug", "is_public", "updated_at"
+            filter_backends: The backend filters (SearchFilter).
+            FilterSet: The filter class for category-based filtering.
+            Pagination: The pagination class used for listing.
+            search_fields: Fields that support search (title, slug).
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductAdminList'
+          description: ''
+    post:
+      operationId: admin_products_create
+      description: |-
+        API view for listing and creating products in the administration panel.
+
+        Provides authentication and permission controls for administration users.
+        Supports filtering, searching, and pagination.
+
+        note:
+            authentication: The authentication mechanism used
+            permission_classes: The permissions required (Admin user and other permissions).
+            The base queryset selecting specific fields of Product: "pk", "title", "slug", "is_public", "updated_at"
+            filter_backends: The backend filters (SearchFilter).
+            FilterSet: The filter class for category-based filtering.
+            Pagination: The pagination class used for listing.
+            search_fields: Fields that support search (title, slug).
+      tags:
+      - admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductAdmin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ProductAdmin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductAdmin'
+        required: true
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductAdmin'
+          description: ''
+  /api/admin/user/{id}/:
+    get:
+      operationId: admin_user_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailAdmin'
+          description: ''
+  /api/admin/users/:
+    get:
+      operationId: admin_users_list
+      parameters:
+      - in: query
+        name: is_active
+        schema:
+          type: boolean
+      - in: query
+        name: is_staff
+        schema:
+          type: boolean
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserListAdminList'
+          description: ''
+  /api/categories/:
+    get:
+      operationId: categories_list
+      description: |-
+        API view for listing categories.
+        - Supports filtering, searching, and ordering on (name & slug) fields.
+        - Paginates results with defauly=10, max_limit=30.
+      parameters:
+      - in: query
+        name: depth
+        schema:
+          type: integer
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: root
+        schema:
+          type: boolean
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - categories
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryListList'
+          description: ''
+  /api/category/{slug}/:
+    get:
+      operationId: category_retrieve
+      description: |-
+        API view for retrieving category details.
+        - Returns category details along with its direct children.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - category
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetail'
+          description: ''
+  /api/login/:
+    post:
+      operationId: login_create
+      description: |-
+        User Authentication View.
+        (POST) and (DELETE)
+        This view handles user login and logout.
+
+        POST:
+            Authenticates a user based on email and password.
+            Returns a 200 OK response with a success message and sets authentication cookies
+            (access_token, refresh_token, expiry_date) upon successful authentication.
+            Returns a 401 Unauthorized response if authentication fails.
+
+            Request body (JSON):
+                - email (string, required): User's email address.
+                - password (string, required): User's password.
+
+            Response (200 OK):
+                - message (string): user email
+
+            Response (401 Unauthorized):
+                - detail (string): "No active account found with the given credentials"
+
+        DELETE:
+            Logs out the user by deleting the authentication cookies.
+            Returns a 200 OK response with a success message.
+
+            Request body: None
+
+            Response (200 OK):
+                - message (string): "Authentication tokens has been destroyed."
+
+        Authentication:
+            This endpoint does not require any authentication to be accessed.
+
+        Cookies:
+            - access_token (HTTPOnly):  Short-lived access token for API authorization.
+            - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserAuthentication'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserAuthentication'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserAuthentication'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserAuthentication'
+          description: ''
+    delete:
+      operationId: login_destroy
+      description: |-
+        User Authentication View.
+        (POST) and (DELETE)
+        This view handles user login and logout.
+
+        POST:
+            Authenticates a user based on email and password.
+            Returns a 200 OK response with a success message and sets authentication cookies
+            (access_token, refresh_token, expiry_date) upon successful authentication.
+            Returns a 401 Unauthorized response if authentication fails.
+
+            Request body (JSON):
+                - email (string, required): User's email address.
+                - password (string, required): User's password.
+
+            Response (200 OK):
+                - message (string): user email
+
+            Response (401 Unauthorized):
+                - detail (string): "No active account found with the given credentials"
+
+        DELETE:
+            Logs out the user by deleting the authentication cookies.
+            Returns a 200 OK response with a success message.
+
+            Request body: None
+
+            Response (200 OK):
+                - message (string): "Authentication tokens has been destroyed."
+
+        Authentication:
+            This endpoint does not require any authentication to be accessed.
+
+        Cookies:
+            - access_token (HTTPOnly):  Short-lived access token for API authorization.
+            - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+      tags:
+      - login
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/product/{slug}:
+    get:
+      operationId: product_retrieve
+      description: |-
+        API endpoint for retrieving the details of a single public product by its slug.
+
+        **URL Parameter:**
+        - `slug` (str): The unique slug identifier for the product.
+
+        **Response Data:**
+        - `title` (str): The product's title.
+        - `slug` (str): The unique slug identifier.
+        - `description` (str): A brief description of the product.
+        - `meta_title` (str): SEO meta title for the product.
+        - `meta_description` (str): SEO meta description for the product.
+        - `categories` (list): A list of related categories, each containing:
+          - `name` (str): The category name.
+          - `slug` (str): The category slug.
+
+        **Example Request:**
+            GET /api/products/example1/
+
+        **Example Response:**
+        ```json
+        {
+            "title": "example 1",
+            "slug": "example1",
+            "description": "...",
+            "meta_title": "...",
+            "meta_description": "...",
+            "categories": [
+                {"name": "...", "slug": "..."},
+                {"name": "...", "slug": "..."},
+            ]
+        }
+        ```
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - product
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+          description: ''
+  /api/products/:
+    get:
+      operationId: products_list
+      description: |-
+        API endpoint for retrieving a paginated list of public products.
+
+        - Supports filtering by category slug.
+        - And searching on (title and slug) fields
+        - Uses limit-offset pagination with a default limit of 10.
+
+        **Query Parameters:**
+        - `limit`: Number of products per page (default: 10, max: 30)
+        - `offset`: Number of items to skip (for pagination)
+        - `category`: Filter by category slug (case-insensitive, partial matching)
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - products
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductListList'
+          description: ''
+  /api/register/:
+    post:
+      operationId: register_create
+      description: |-
+        User Registration View.
+        (POST) This view handles user registration.
+            Creates a new user account.
+            Returns a 201 Created response with the user's email and sets authentication cookies
+            (access_token, refresh_token, expiry_date) upon successful registration.
+
+            Request body (JSON):
+                - email (string, required): User's email address.
+                - password (string, required): User's password.
+
+            Response (201 Created):
+                - email (string): The registered user's email address.
+
+        Authentication:
+            This endpoint does not require any authentication to be accessed.
+
+        Cookies:
+            - access_token (HTTPOnly):  Short-lived access token for API authorization.
+            - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+      tags:
+      - register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistration'
+          description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    CategoryAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          writeOnly: true
+          pattern: ^[-\w]+$
+          maxLength: 255
+        is_public:
+          type: boolean
+        ancestors_are_public:
+          type: boolean
+        is_root:
+          type: boolean
+          readOnly: true
+        description:
+          type: string
+          writeOnly: true
+        meta_title:
+          type: string
+          writeOnly: true
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          writeOnly: true
+          nullable: true
+          maxLength: 300
+        metadata:
+          writeOnly: true
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        background:
+          type: string
+          format: uri
+          writeOnly: true
+          nullable: true
+        background_caption:
+          type: string
+          writeOnly: true
+          maxLength: 128
+        position:
+          allOf:
+          - $ref: '#/components/schemas/PositionEnum'
+          writeOnly: true
+          default: root
+        relative_to:
+          type: integer
+          writeOnly: true
+      required:
+      - is_root
+      - name
+      - pk
+      - slug
+      - updated_at
+    CategoryDeatilAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        full_name:
+          type: string
+          readOnly: true
+        is_public:
+          type: boolean
+        ancestors_are_public:
+          type: boolean
+        description:
+          type: string
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+        metadata:
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        background:
+          type: string
+          format: uri
+          nullable: true
+        background_caption:
+          type: string
+          maxLength: 128
+        position:
+          allOf:
+          - $ref: '#/components/schemas/PositionEnum'
+          writeOnly: true
+          default: root
+        relative_to:
+          type: integer
+          writeOnly: true
+      required:
+      - full_name
+      - name
+      - pk
+      - slug
+      - updated_at
+    CategoryDetail:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        background:
+          type: string
+          format: uri
+          nullable: true
+        background_caption:
+          type: string
+          maxLength: 128
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+        description:
+          type: string
+      required:
+      - name
+      - pk
+      - slug
+    CategoryList:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        background:
+          type: string
+          format: uri
+          nullable: true
+        background_caption:
+          type: string
+          maxLength: 128
+      required:
+      - name
+      - slug
+    CategoryNodeMovementAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        position:
+          allOf:
+          - $ref: '#/components/schemas/PositionEnum'
+          writeOnly: true
+          default: root
+        relative_to:
+          type: integer
+          writeOnly: true
+      required:
+      - pk
+    LanguageCodeEnum:
+      enum:
+      - en
+      - fa
+      - fr
+      - de
+      - ar
+      type: string
+      description: |-
+        * `en` - English
+        * `fa` - Persian
+        * `fr` - French
+        * `de` - German
+        * `ar` - Arabic
+    PaginatedCategoryAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryAdmin'
+    PaginatedCategoryListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryList'
+    PaginatedProductAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAdmin'
+    PaginatedProductAttributeAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeAdmin'
+    PaginatedProductClassAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductClassAdmin'
+    PaginatedProductListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductList'
+    PaginatedUserListAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserListAdmin'
+    PatchedCategoryDeatilAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        full_name:
+          type: string
+          readOnly: true
+        is_public:
+          type: boolean
+        ancestors_are_public:
+          type: boolean
+        description:
+          type: string
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+        metadata:
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        background:
+          type: string
+          format: uri
+          nullable: true
+        background_caption:
+          type: string
+          maxLength: 128
+        position:
+          allOf:
+          - $ref: '#/components/schemas/PositionEnum'
+          writeOnly: true
+          default: root
+        relative_to:
+          type: integer
+          writeOnly: true
+    PatchedCategoryNodeMovementAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        position:
+          allOf:
+          - $ref: '#/components/schemas/PositionEnum'
+          writeOnly: true
+          default: root
+        relative_to:
+          type: integer
+          writeOnly: true
+    PatchedProductAttributeDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_class:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        name:
+          type: string
+          maxLength: 250
+        slug:
+          type: string
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        value_type:
+          $ref: '#/components/schemas/ValueTypeEnum'
+        require:
+          type: boolean
+    PatchedProductClassDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bases:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        metadata:
+          nullable: true
+        title:
+          type: string
+          maxLength: 250
+        require_shipping:
+          type: boolean
+        track_stock:
+          type: boolean
+        abstract:
+          type: boolean
+    PatchedProductDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeValue'
+          writeOnly: true
+        product_type:
+          type: integer
+          writeOnly: true
+        categories:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+        metadata:
+          nullable: true
+        description:
+          type: string
+        title:
+          type: string
+          maxLength: 250
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PositionEnum:
+      enum:
+      - root
+      - first_child_of
+      - after
+      - before
+      type: string
+      description: |-
+        * `root` - Root
+        * `first_child_of` - First Child Of
+        * `after` - After
+        * `before` - Before
+    ProductAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeValue'
+          writeOnly: true
+        product_type:
+          type: integer
+          writeOnly: true
+        categories:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          writeOnly: true
+          pattern: ^[-\w]+$
+          maxLength: 255
+        meta_title:
+          type: string
+          writeOnly: true
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          writeOnly: true
+          nullable: true
+          maxLength: 300
+        metadata:
+          writeOnly: true
+          nullable: true
+        description:
+          type: string
+          writeOnly: true
+        title:
+          type: string
+          maxLength: 250
+        is_public:
+          type: boolean
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - id
+      - product_type
+      - slug
+      - title
+      - updated_at
+    ProductAttributeAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_class:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        name:
+          type: string
+          maxLength: 250
+        slug:
+          type: string
+          writeOnly: true
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        value_type:
+          $ref: '#/components/schemas/ValueTypeEnum'
+        require:
+          type: boolean
+          writeOnly: true
+      required:
+      - id
+      - name
+      - slug
+    ProductAttributeDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product_class:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        name:
+          type: string
+          maxLength: 250
+        slug:
+          type: string
+          maxLength: 128
+          pattern: ^[-a-zA-Z0-9_]+$
+        value_type:
+          $ref: '#/components/schemas/ValueTypeEnum'
+        require:
+          type: boolean
+      required:
+      - id
+      - name
+      - slug
+    ProductAttributeValue:
+      type: object
+      properties:
+        attribute:
+          type: integer
+        value: {}
+      required:
+      - attribute
+      - value
+    ProductClassAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bases:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          writeOnly: true
+          pattern: ^[-\w]+$
+          maxLength: 255
+        metadata:
+          writeOnly: true
+          nullable: true
+        title:
+          type: string
+          maxLength: 250
+        require_shipping:
+          type: boolean
+        track_stock:
+          type: boolean
+        abstract:
+          type: boolean
+      required:
+      - id
+      - slug
+      - title
+    ProductClassDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        bases:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        metadata:
+          nullable: true
+        title:
+          type: string
+          maxLength: 250
+        require_shipping:
+          type: boolean
+        track_stock:
+          type: boolean
+        abstract:
+          type: boolean
+      required:
+      - id
+      - slug
+      - title
+    ProductDetail:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 250
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        categories:
+          type: array
+          items: {}
+          readOnly: true
+        description:
+          type: string
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+      required:
+      - categories
+      - slug
+      - title
+    ProductDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAttributeValue'
+          writeOnly: true
+        product_type:
+          type: integer
+          writeOnly: true
+        categories:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+        meta_title:
+          type: string
+          nullable: true
+          maxLength: 70
+        meta_description:
+          type: string
+          nullable: true
+          maxLength: 300
+        metadata:
+          nullable: true
+        description:
+          type: string
+        title:
+          type: string
+          maxLength: 250
+        is_public:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - product_type
+      - slug
+      - title
+      - updated_at
+    ProductList:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 250
+        slug:
+          type: string
+          pattern: ^[-\w]+$
+          maxLength: 255
+      required:
+      - slug
+      - title
+    UserAuthentication:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          maxLength: 128
+      required:
+      - email
+      - password
+    UserDetailAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        metadata:
+          nullable: true
+        description:
+          type: string
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        is_confirmed:
+          type: boolean
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+        language_code:
+          $ref: '#/components/schemas/LanguageCodeEnum'
+        groups:
+          type: array
+          items:
+            type: integer
+          description: The groups this user belongs to. A user will get all permissions
+            granted to each of their groups.
+        user_permissions:
+          type: array
+          items:
+            type: integer
+          description: Specific permissions for this user.
+      required:
+      - date_joined
+      - email
+      - id
+      - updated_at
+    UserListAdmin:
+      type: object
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        email:
+          type: string
+          format: email
+          title: Email address
+          maxLength: 254
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_active:
+          type: boolean
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - email
+      - pk
+    UserRegistration:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          maxLength: 128
+        password_again:
+          type: string
+          maxLength: 128
+      required:
+      - email
+      - password
+      - password_again
+    ValueTypeEnum:
+      enum:
+      - charactor
+      - integer
+      - float
+      - boolean
+      - date
+      - datetime
+      - time
+      type: string
+      description: |-
+        * `charactor` - Charactor
+        * `integer` - Integer
+        * `float` - Float
+        * `boolean` - True / False
+        * `date` - Date
+        * `datetime` - Date - Time
+        * `time` - Time
+  securitySchemes:
+    JWT Cookies Auth:
+      type: http
+      scheme: ''
+      bearerFormat: JWT
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
