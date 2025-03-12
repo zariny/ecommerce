@@ -1,11 +1,14 @@
+from pure_eval.my_getattr_static import safe_descriptors_raw
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from treebeard.exceptions import InvalidPosition, InvalidMoveToDescendant, PathOverflow
 from .. import models
 
 
 class BaseCategoryAdminSerializer(serializers.ModelSerializer):
     positions = [("root", "Root"), ("first_child_of", "First Child Of"), ("after", "After"), ("before", "Before")]
     position = serializers.ChoiceField(choices=positions, default=positions[0][0], write_only=True, label="Position")
+    is_root = serializers.SerializerMethodField(method_name="is_root_method_field", read_only=True)
     relative_to = serializers.PrimaryKeyRelatedField(
         queryset=models.Category.objects.all(),
         write_only=True,
@@ -14,7 +17,10 @@ class BaseCategoryAdminSerializer(serializers.ModelSerializer):
         label="Relative to"
     )
 
-    def move(self, instance, position, relative_to=None):
+    def is_root_method_field(self, instance) -> bool:
+        return instance.is_root()
+
+    def _move(self, instance, position, relative_to=None):
         if position == "root":
             if instance.is_root():
                 return instance
@@ -34,6 +40,12 @@ class BaseCategoryAdminSerializer(serializers.ModelSerializer):
 
         instance.refresh_from_db()
         return instance
+
+    def move(self, instance, position, relative_to=None):
+        try:
+            return self._move(instance, position, relative_to)
+        except (InvalidPosition, InvalidMoveToDescendant, PathOverflow) as e:
+            raise ValidationError({"position": e})
 
     def update(self, instance, validated_data):
         position = validated_data.pop("position", None)
@@ -122,3 +134,19 @@ class CategoryDeatilAdminSerializer(BaseCategoryAdminSerializer):
         representation["position"] = position
         representation["relative_to"] = relative_to
         return representation
+
+
+class CategoryNodeMovementAdminSerializer(BaseCategoryAdminSerializer):
+    class Meta:
+        model = models.Category
+        fields = ("pk", "position", "relative_to")
+        extra_kwargs = {
+            "position": {"required": True}
+        }
+
+    def update(self, instance, validated_data):
+        position = validated_data.pop("position", None)
+        relative_to = validated_data.pop("relative_to", None)
+        if position is not None:
+            self.move(instance, position, relative_to)
+        return instance
