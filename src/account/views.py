@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model, authenticate
+from django.utils.timezone import localtime
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken
@@ -15,25 +16,26 @@ class SetAuthenticationCookiesMixin:
             value=str(refresh_token),
             httponly=True,
             samesite="Lax",
-            max_age=604800
+            max_age=refresh_token.lifetime.total_seconds()
         )
-        access_token = refresh_token.access_token
-        self.set_access_token(response, access_token)
+        self.set_access_token(response, refresh_token)
 
-    def set_access_token(self, response, access_token):
+    def set_access_token(self, response, refresh_token):
+        access_token = refresh_token.access_token
+        access_token_expiry = localtime(access_token.current_time).strftime("%Y-%m-%dT%H:%M:%SZ")
         response.set_cookie(
             key="access_token",
             value=str(access_token),
             httponly=True,
             samesite="Lax",
-            max_age=300
+            max_age=access_token.lifetime.total_seconds()
         )
         response.set_cookie(
             key="expiry_date",
-            value=access_token.current_time,
+            value=access_token_expiry,
             httponly=False,
             samesite="Lax",
-            max_age=604800
+            max_age=refresh_token.lifetime.total_seconds()
         )
 
 
@@ -74,7 +76,7 @@ class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMi
     Cookies:
         - access_token (HTTPOnly):  Short-lived access token for API authorization.
         - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has  format.
     """
     permission_classes = (permissions.AllowAny,)
     serializer_class = serializers.UserAuthenticationSerializer
@@ -125,7 +127,7 @@ class UserRegistrationView(generics.GenericAPIView, SetAuthenticationCookiesMixi
     Cookies:
         - access_token (HTTPOnly):  Short-lived access token for API authorization.
         - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has ISO 8601 format.
     """
     serializer_class = serializers.UserRegistrationSerializer
     permission_classes = (permissions.AllowAny,)
@@ -153,7 +155,7 @@ class TokenRefreshView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
         Request body: None
 
         Response (200 OK):
-            - message (string): "Access token refreshed"
+            - detail (string): "Access token refreshed"
 
         Response (401 Unauthorized):
             - detail (string): "Invalid or expired refresh token"
@@ -163,7 +165,7 @@ class TokenRefreshView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
     Cookies:
         - access_token (HTTPOnly):  Short-lived access token for API authorization.
         - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+        - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has ISO 8601 format.
     """
     def head(self, request):
         refresh_token = request.COOKIES.get("refresh_token")
@@ -173,10 +175,9 @@ class TokenRefreshView(generics.GenericAPIView, SetAuthenticationCookiesMixin):
 
         try:
             refresh_token = RefreshToken(refresh_token)
-            access_token = refresh_token.access_token
 
-            response = Response({"message": "Access token refreshed"}, status=status.HTTP_200_OK)
-            self.set_access_token(response, access_token)
+            response = Response({"detail": "Access token refreshed"}, status=status.HTTP_200_OK)
+            self.set_access_token(response, refresh_token)
             return response
         except TokenError:
             return Response({"detail": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
