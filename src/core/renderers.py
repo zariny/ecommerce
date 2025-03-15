@@ -11,6 +11,7 @@ class StructuredJSONRenderer(JSONRenderer):
             message: str = data.pop("detail", default_massaage)
             data = {
                 "success": success_flag,
+                "status": status_code,
                 "message": message,
                 "data": data if success_flag else None,
                 "errors": data if not success_flag else None
