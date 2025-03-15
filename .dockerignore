@@ -1,3 +1,3 @@
 *.log*
 media/
-sandbox/db.sqlite3
+sandbox/sqlite/db.sqlite3
