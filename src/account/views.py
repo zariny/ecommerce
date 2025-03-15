@@ -99,7 +99,8 @@ class UserAuthenticationView(generics.GenericAPIView, SetAuthenticationCookiesMi
             return Response(message, status=status.HTTP_401_UNAUTHORIZED)
 
     def delete(self, request):
-        response = Response({"message": "Authentication tokens has been destroyed."}, status.HTTP_200_OK)
+        message = {"detail": "Authentication tokens has been destroyed."}
+        response = Response(message, status.HTTP_200_OK)
         response.delete_cookie("access_token")
         response.delete_cookie("refresh_token")
         response.delete_cookie("expiry_date")
