@@ -48,3 +48,11 @@ class TranslationModel(BaseSeoModel, BaseTranslateModel):
 
     class Meta:
         abstract = True
+
+
+class DatedModel(models.Model):
+    date_created = models.DateTimeField("Date created", auto_now_add=True)
+    date_updated = models.DateTimeField("Date updated", auto_now=True, db_index=True)
+
+    class Meta:
+        abstract = True
