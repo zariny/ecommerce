@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from . import serializers
-
+from datetime import datetime, UTC
 
 User = get_user_model()
 
@@ -22,7 +22,7 @@ class SetAuthenticationCookiesMixin:
 
     def set_access_token(self, response, refresh_token):
         access_token = refresh_token.access_token
-        access_token_expiry = localtime(access_token.current_time).strftime("%Y-%m-%dT%H:%M:%SZ")
+        access_token_expiry = datetime.fromtimestamp(access_token["exp"], UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
         response.set_cookie(
             key="access_token",
             value=str(access_token),
