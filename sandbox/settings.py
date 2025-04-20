@@ -60,6 +60,8 @@ INSTALLED_APPS = [
     "catalogue",
     "core",
     "products",
+    "basket",
+    "inventory",
     # third-party apps
     "channels",
     "rest_framework",

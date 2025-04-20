@@ -3,7 +3,7 @@ from core.models import DatedModel
 from core.utils import currencies
 
 
-class Basket(models.Model):
+class Basket(DatedModel):
     owner = models.ForeignKey("account.User", on_delete=models.CASCADE, related_name="carts", null=True)
 
 
