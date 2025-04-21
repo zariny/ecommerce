@@ -31,3 +31,56 @@ class UserDetailAdminView(generics.RetrieveAPIView):
     permission_classes = (AdminAndModelLevelPermission,)
     queryset = User.objects.all()
     serializer_class = serializers.UserDetailAdminSerializer
+
+
+class AdminUserRoleView(APIView): # TODO need develop
+    """
+        Permission Levels:
+
+    \n
+    ┌────────────────────────────┐
+    │         SUPERUSER          │
+    ├────────────────────────────┤
+    │          MANAGER           │
+    ├────────────────────────────┤
+    │           VIEWER           │
+    ├────────────────────────────┤
+    │           ADMIN            │
+    └────────────────────────────┘
+    \n.
+
+    ------------------
+    - ADMIN:
+        Default fallback role for authenticated admin users without explicit group assignment.
+
+    - VIEWER:
+        Has permission to perform (safe HTTP methods) (GET, HEAD, OPTIONS)
+        on endpoints of the app they have access to.
+
+    - MANAGER:
+        Has permission to perform (safe methods), also (modification methods)
+        such as PUT, PATCH, DELETE, or POST. However, the user MAY ONLY HAVE PERMISSION to some these methods.
+
+    - SUPERUSER:
+        Has full unrestricted access across all apps and endpoints.
+
+    This view returns the current authenticated admin user's roles and permissions.
+    It's used by the frontend dashboard to determine which parts of the UI should be accessible.
+    """
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (IsAdminUser,)
+
+    def get(self, request):
+        roles = list()
+        if request.user.is_superuser:
+            roles.append("superuser")
+        else:
+            roles += list(request.user.groups.values_list("name", flat=True))
+
+        if not roles:
+            roles.append("admin")
+
+        data = {
+            "roles": roles
+        }
+        return Response(data, status=status.HTTP_200_OK)
