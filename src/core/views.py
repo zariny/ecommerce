@@ -10,10 +10,10 @@ class ListLimitOffsetPagination(LimitOffsetPagination):
 
 class BaseAdminView(generics.ListCreateAPIView):
     authentication_classes = (authenticate.JWTCookiesBaseAuthentication,)
-    permission_classes = (permissions.AdminSafeOrModelLvlPermission,)
+    permission_classes = (permissions.AdminAndModelLevelPermission,)
     pagination_class = ListLimitOffsetPagination
 
 
 class BaseAdminDetailView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = (authenticate.JWTCookiesBaseAuthentication,)
-    permission_classes = (permissions.AdminSafeOrModelLvlPermission,)
+    permission_classes = (permissions.AdminAndModelLevelPermission,)
