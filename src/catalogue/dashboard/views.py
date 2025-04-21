@@ -4,7 +4,7 @@ from django_filters import rest_framework as filters
 from django.db.models import OuterRef, Subquery
 from core.views import BaseAdminView, BaseAdminDetailView
 from core.authenticate import JWTCookiesBaseAuthentication
-from core.permissions import AdminSafeOrModelLvlPermission
+from core.permissions import AdminAndModelLevelPermission
 from .. import models
 from . import serializers
 
@@ -123,6 +123,6 @@ class CategoryNodeMovementView(generics.UpdateAPIView):
           to reflect the updated hierarchy.
     """
     authentication_classes = (JWTCookiesBaseAuthentication,)
-    permission_classes = (AdminSafeOrModelLvlPermission,)
+    permission_classes = (AdminAndModelLevelPermission,)
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategoryNodeMovementAdminSerializer
