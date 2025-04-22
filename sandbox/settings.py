@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "products",
     "basket",
     "inventory",
+    "order",
     # third-party apps
     "channels",
     "rest_framework",
