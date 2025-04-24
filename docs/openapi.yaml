@@ -618,6 +618,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/CategoryNodeMovementAdmin'
           description: ''
+  /api/admin/myrole/:
+    get:
+      operationId: admin_myrole_retrieve
+      description: |2-
+                Permission Levels:
+
+
+
+            ┌────────────────────────────┐
+            │         SUPERUSER          │
+            ├────────────────────────────┤
+            │          MANAGER           │
+            ├────────────────────────────┤
+            │           VIEWER           │
+            ├────────────────────────────┤
+            │           ADMIN            │
+            └────────────────────────────┘
+
+        .
+
+            ------------------
+            - ADMIN:
+                Default fallback role for authenticated admin users without explicit group assignment.
+
+            - VIEWER:
+                Has permission to perform (safe HTTP methods) (GET, HEAD, OPTIONS)
+                on endpoints of the app they have access to.
+
+            - MANAGER:
+                Has permission to perform (safe methods), also (modification methods)
+                such as PUT, PATCH, DELETE, or POST. However, the user MAY ONLY HAVE PERMISSION to some these methods.
+
+            - SUPERUSER:
+                Has full unrestricted access across all apps and endpoints.
+
+            This view returns the current authenticated admin user's roles and permissions.
+            It's used by the frontend dashboard to determine which parts of the UI should be accessible.
+      tags:
+      - admin
+      security:
+      - JWT Cookies Auth: []
+      responses:
+        '200':
+          description: No response body
   /api/admin/product/{id}/:
     get:
       operationId: admin_product_retrieve
@@ -1190,7 +1234,7 @@ paths:
         Cookies:
             - access_token (HTTPOnly):  Short-lived access token for API authorization.
             - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has  format.
       tags:
       - login
       requestBody:
@@ -1254,7 +1298,7 @@ paths:
         Cookies:
             - access_token (HTTPOnly):  Short-lived access token for API authorization.
             - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has  format.
       tags:
       - login
       security:
@@ -1392,7 +1436,7 @@ paths:
         Cookies:
             - access_token (HTTPOnly):  Short-lived access token for API authorization.
             - refresh_token (HTTPOnly): Long-lived refresh token for obtaining new access tokens.
-            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly.
+            - expiry_date:  The expiry date of the access token.  This is *not* HTTPOnly, and has ISO 8601 format.
       tags:
       - register
       requestBody:
