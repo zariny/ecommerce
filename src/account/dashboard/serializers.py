@@ -15,3 +15,10 @@ class UserDetailAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ("password",)
+
+
+class UserRoleSerializer(serializers.Serializer):
+    roles = serializers.ListField(
+        child=serializers.CharField(),
+        help_text="List of roles assigned to the current admin user"
+    )

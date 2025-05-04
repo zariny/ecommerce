@@ -1,11 +1,8 @@
-from django.db.transaction import rollback
+from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from rest_framework import status
-from django.contrib.auth import get_user_model
 from core.permissions import AdminAndModelLevelPermission
 from core.authenticate import JWTCookiesBaseAuthentication
 from core.views import ListLimitOffsetPagination
@@ -33,7 +30,7 @@ class UserDetailAdminView(generics.RetrieveAPIView):
     serializer_class = serializers.UserDetailAdminSerializer
 
 
-class AdminUserRoleView(APIView): # TODO need develop
+class AdminUserRoleView(generics.GenericAPIView): # TODO need develop
     """
         Permission Levels:
 
@@ -59,7 +56,7 @@ class AdminUserRoleView(APIView): # TODO need develop
 
     - MANAGER:
         Has permission to perform (safe methods), also (modification methods)
-        such as PUT, PATCH, DELETE, or POST. However, the user MAY ONLY HAVE PERMISSION to some these methods.
+        such as PUT, PATCH, DELETE, or POST. However, the user MAY ONLY HAVE PERMISSION TO SOME of these methods.
 
     - SUPERUSER:
         Has full unrestricted access across all apps and endpoints.
@@ -69,6 +66,7 @@ class AdminUserRoleView(APIView): # TODO need develop
     """
     authentication_classes = (JWTCookiesBaseAuthentication,)
     permission_classes = (IsAdminUser,)
+    serializer_class = serializers.UserRoleSerializer
 
     def get(self, request):
         roles = list()
@@ -83,4 +81,6 @@ class AdminUserRoleView(APIView): # TODO need develop
         data = {
             "roles": roles
         }
-        return Response(data, status=status.HTTP_200_OK)
+
+        serializer = self.get_serializer(data)
+        return Response(serializer.data)
