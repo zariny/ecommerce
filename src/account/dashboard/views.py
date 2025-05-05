@@ -1,8 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db.models.functions import TruncDay, TruncMonth
-from django.db.models import Count
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.db.models import Count, Q
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from core.permissions import AdminAndModelLevelPermission
@@ -120,3 +123,25 @@ class UserGrowthChartView(generics.ListAPIView):
         queryset = filterset.qs.annotate(date=proper_trunk("date_joined")).values("date").annotate(count=Count("pk"))
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class UserCountView(APIView):
+    """
+    API endpoint to retrieve user statistics for use in visualizations such as a radial chart.
+    Response Format:
+    {
+        total: int,
+        confirmed_users: int
+    }
+    """
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminAndModelLevelPermission,)
+    queryset = User.objects.all()
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def get(self, request, *args, **kwargs):
+        data = self.queryset.aggregate(
+            total=Count("pk"),
+            confirmed_users=Count("pk", filter=Q(is_confirmed=True))
+        )
+        return Response(data)
