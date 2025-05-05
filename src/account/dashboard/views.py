@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.db.models.functions import TruncDay, TruncMonth
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, generics
 from rest_framework.permissions import IsAdminUser
@@ -6,6 +8,7 @@ from rest_framework.response import Response
 from core.permissions import AdminAndModelLevelPermission
 from core.authenticate import JWTCookiesBaseAuthentication
 from core.views import ListLimitOffsetPagination
+from core.filters import DateRangeFilterSet
 from . import serializers
 
 
@@ -83,4 +86,37 @@ class AdminUserRoleView(generics.GenericAPIView): # TODO need develop
         }
 
         serializer = self.get_serializer(data)
+        return Response(serializer.data)
+
+
+class UserDateRangeFilter(DateRangeFilterSet):
+    class Meta:
+        field_name = "date_joined"
+
+
+class UserGrowthChartView(generics.ListAPIView):
+    """
+    API endpoint to retrieve user registration growth over time.
+
+    This endpoint returns the number of new registered users grouped by day or month,
+    depending on the selected date range. If no query parameters are provided,
+    the default range is the past 30 days (grouped daily). If the date range exceeds
+    40 days, results will be grouped monthly.
+    """
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminAndModelLevelPermission,)
+    queryset = User.objects.all()
+    serializer_class = serializers.UserGrowthChartSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = UserDateRangeFilter
+
+    def get(self, request, *args, **kwargs):
+        filterset = self.filterset_class(data=request.GET, queryset=self.get_queryset(), request=request)
+
+        if not filterset.is_valid():
+            return Response(filterset.errors, status=400)
+
+        proper_trunk = TruncDay if filterset.delta <= 30 else TruncMonth
+        queryset = filterset.qs.annotate(date=proper_trunk("date_joined")).values("date").annotate(count=Count("pk"))
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

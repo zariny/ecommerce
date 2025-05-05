@@ -22,3 +22,11 @@ class UserRoleSerializer(serializers.Serializer):
         child=serializers.CharField(),
         help_text="List of roles assigned to the current admin user"
     )
+
+
+class UserGrowthChartSerializer(serializers.ModelSerializer):
+    count = serializers.IntegerField(read_only=True)
+    date = serializers.DateTimeField(read_only=True)
+    class Meta:
+        model = User
+        fields = ("date", 'count')
