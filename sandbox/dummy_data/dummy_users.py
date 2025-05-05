@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from sandbox.settings import CORE_LANGUAGES
 from .utils import random_datetime
 from .abstraction import AbstractHandler
+from datetime import timedelta
 
 
 class DummyUsersHandler(AbstractHandler):
@@ -27,7 +28,8 @@ class DummyUsersHandler(AbstractHandler):
             is_staff = random.choices([True, False], weights=[10, 90], k=1)[0]
             is_active = random.choices([True, False], weights=[95, 5], k=1)[0]
             language_code = random.choice(CORE_LANGUAGES)[0]
-            last_login = random_datetime()
+            date_joined = random_datetime()
+            last_login = date_joined + timedelta(hours=1)
             self.users.append(
                 self.model(
                     email=email,
@@ -37,7 +39,8 @@ class DummyUsersHandler(AbstractHandler):
                     is_staff=is_staff,
                     is_active=is_active,
                     language_code=language_code,
-                    last_login=last_login
+                    last_login=last_login,
+                    date_joined=date_joined
                 )
             )
 
