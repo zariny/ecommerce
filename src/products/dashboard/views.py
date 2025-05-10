@@ -1,6 +1,13 @@
+from django.db.models import Count, Q
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from rest_framework import generics
+from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from django_filters import rest_framework as filters
 from core.views import BaseAdminView, BaseAdminDetailView
+from core.authenticate import JWTCookiesBaseAuthentication
+from core.permissions import AdminAndModelLevelPermission
 from .. import models
 from . import serializers
 
@@ -18,9 +25,9 @@ class ProductFilterByCategoryAdmin(filters.FilterSet):
 
 class ProductAdminView(BaseAdminView):
     """
-    API view for listing and creating products in the administration panel.
+    API view for listing and creating products in the dashboard panel.
 
-    Provides authentication and permission controls for administration users.
+    Provides authentication and permission controls for dashboard users.
     Supports filtering, searching, and pagination.
 
     note:
@@ -41,7 +48,7 @@ class ProductAdminView(BaseAdminView):
 
 class ProductDetailAdminView(BaseAdminDetailView):
     """
-    API view for retrieving and updating product details in the administration panel.
+    API view for retrieving and updating product details in the dashboard panel.
     Supports retrieving product details, including related product type and prefetching categories.
 
     note:
@@ -83,3 +90,26 @@ class ProductClassAdminView(BaseAdminView):
 class ProductClassDetailAdminView(BaseAdminDetailView):
     queryset = models.ProductClass.objects.all()
     serializer_class = serializers.ProductClassDetailAdminSerializer
+
+
+class ProductCountView(generics.GenericAPIView):
+    """
+    API view that returns the total count of public products and the count of products that are in stock.
+    - The response is cached for 2 hours
+    Returns:
+        JSON object with:
+            - total: Total number of public products.
+            - instock: Number of public products with stockrecords indicating more than 1 item in stock.
+    """
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminAndModelLevelPermission,)
+    queryset = models.Product.objects.filter(is_public=True)
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        queryset = queryset.aggregate(
+            total=Count("pk"),
+            instock=Count(expression="pk", filter=Q(stockrecords__num_in_stock__gt=1))
+        )
+        return Response(queryset)
