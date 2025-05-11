@@ -18,10 +18,17 @@ class DummyOrderHandler(AbstractHandler):
         User = get_user_model()
         users = User.objects.all()
         for _ in range(1000):
+            price = random.uniform(1.1, 150.9)
+            price = int(price*100) / 100
             self.orders.append(
                 Order(
                     user=random.choice(users),
-                    date_updated=random_datetime()
+                    date_updated=random_datetime(),
+                    date_created=random_datetime(),
+                    status="complete",
+                    total_excl_tax=price,
+                    total_incl_tax=price + 2.1,
+                    date_placed=random_datetime()
                 )
             )
         self.save()
