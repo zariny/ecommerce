@@ -8,7 +8,10 @@ class StructuredJSONRenderer(JSONRenderer):
             status_code = renderer_context["response"].status_code
             success_flag: bool = not has_exception and status_code < 400
             default_massaage = "Succesfully" if success_flag else "Failed"
-            message: str = data.pop("detail", default_massaage)
+            if data:
+                message: str = data.pop("detail", default_massaage)
+            else:
+                message: str = default_massaage
             data = {
                 "success": success_flag,
                 "message": message,
