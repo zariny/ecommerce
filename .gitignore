@@ -1,6 +1,6 @@
 .venv/
 .idea/
-.media/
+media/
 __pycache__
 db.sqlite3
 *.log*
