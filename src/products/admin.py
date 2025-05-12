@@ -123,6 +123,12 @@ class ProductClassAdmin(AbstractPieChartModelAdmin):
     list_filter = (IsAbstraction, IsRequiredShipping,)
 
 
+@admin.register(models.ProductMedia)
+class ProductMediaAdmin(admin.ModelAdmin):
+    list_display = ("product__title", "image", "published")
+    autocomplete_fields = ("product",)
+
+
 admin.site.register(models.ProductClassRelation)
 admin.site.register(models.ProductTranslate)
 admin.site.register(models.ProductAttributeTranslate)
