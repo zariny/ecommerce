@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel
+from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel, SortableModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
 from .validation import validate_no_cycles
@@ -173,6 +173,17 @@ class ProductAttributeValue(models.Model):
     @property
     def data_type(self):
         return self.attribute.value_type
+
+
+class ProductMedia(ModelWithMetadata, SortableModel):
+    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="medias")
+    image = models.ImageField(upload_to="products", blank=True, null=True)
+    caption = models.CharField(max_length=250, blank=True)
+    published = models.BooleanField(default=False)
+
+    class Meta:
+        app_label = "products"
+        ordering = ("sort_order", "pk")
 
 
 class ProductTranslate(TranslationModel):

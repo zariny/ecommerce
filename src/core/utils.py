@@ -1,4 +1,4 @@
 currencies = (
-    ("EUR", "Euro"),
-    ("USD", "US dollar"),
+    ("EUR", "Euro €"),
+    ("USD", "US dollar $"),
 )

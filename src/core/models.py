@@ -10,6 +10,13 @@ class BaseSeoModel(models.Model):
         abstract = True
 
 
+class SortableModel(models.Model):
+    sort_order = models.IntegerField(db_index=True, null=True)
+
+    class Meta:
+        abstract = True
+
+
 class BaseTranslateModel(models.Model):
     language_code = models.CharField(max_length=35, choices=settings.CORE_LANGUAGES, default=settings.LANGUAGE_CODE)
 
