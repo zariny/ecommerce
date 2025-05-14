@@ -1,10 +1,14 @@
-from rest_framework.filters import OrderingFilter, SearchFilter
+from django.db.models import OuterRef, Subquery, Sum, IntegerField
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from rest_framework import generics
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.response import Response
 from django_filters import rest_framework as filters
-from django.db.models import OuterRef, Subquery
 from core.views import BaseAdminView, BaseAdminDetailView
 from core.authenticate import JWTCookiesBaseAuthentication
 from core.permissions import AdminAndModelLevelPermission
+from order.models import OrderLine
 from .. import models
 from . import serializers
 
@@ -126,3 +130,40 @@ class CategoryNodeMovementView(generics.UpdateAPIView):
     permission_classes = (AdminAndModelLevelPermission,)
     queryset = models.Category.objects.all()
     serializer_class = serializers.CategoryNodeMovementAdminSerializer
+
+
+class TopSellingCategoriesView(generics.GenericAPIView):
+    """
+    API view to retrieve the top 6 best-selling product categories based on
+    the total quantity of products sold from completed orders.
+
+    Returns:
+        - 200 OK with a JSON response containing the category names and their corresponding
+          total quantities sold, sorted in descending order of sales.
+
+        - `name`: The name of the category.
+
+        - `total`: The total quantity of products sold in that category.
+
+    Caching:
+        - The GET response is cached for 2 hours to reduce repeated computations
+          and database hits.
+    """
+    authentication_classes = (JWTCookiesBaseAuthentication,)
+    permission_classes = (AdminAndModelLevelPermission,)
+    queryset = models.Category.objects.all()
+
+    @method_decorator(cache_page(60 * 60 * 2))
+    def get(self, request, *args, **kwargs):
+        subquery = OrderLine.objects.filter(
+            order__status="complete",
+            product__categories=OuterRef("pk")
+        ).values('product__categories').annotate(
+            total_quantity=Sum('quantity')
+        ).values('total_quantity')[:1]
+
+        queryset = self.get_queryset().annotate(
+            total=Subquery(subquery, output_field=IntegerField())
+        ).filter(total__isnull=False).values("name", "total").order_by("-total")[:6]
+
+        return Response(queryset)

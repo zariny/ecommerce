@@ -1,4 +1,3 @@
-from pure_eval.my_getattr_static import safe_descriptors_raw
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from treebeard.exceptions import InvalidPosition, InvalidMoveToDescendant, PathOverflow
