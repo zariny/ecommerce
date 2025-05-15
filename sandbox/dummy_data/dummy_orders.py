@@ -1,3 +1,5 @@
+import random
+
 from django.contrib.auth import get_user_model
 from order.models import Order, OrderLine
 from products.models import Product
@@ -48,6 +50,7 @@ class DummyOrderHandler(AbstractHandler):
                     order=random.choice(self.orders),
                     product=random.choice(self.products),
                     stockrecord=default_stockrecord,
+                    quantity=random.randrange(20, 35),
                     line_price_incl_tax=price,
                     line_price_excl_tax=price,
                     line_price_before_discounts_incl_tax=price,
