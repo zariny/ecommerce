@@ -1,8 +1,6 @@
 from products.models import Product, ProductClass
 from catalogue.models import Category, ProductCategory
-from .abstraction import AbstractHandler
-from faker import Faker
-import random
+from .abstraction import *
 
 
 class DummyProductHandler(AbstractHandler):
@@ -12,12 +10,15 @@ class DummyProductHandler(AbstractHandler):
         self.product_category_objects = list()
         self.main_product_kls = ProductClass.objects.get_or_create(slug="main")
 
-    def handle(self, flag):
+    def handle(self, flag, **kwargs):
         if flag:
             self.create_product()
             self.create_product_category()
             self.save()
-            return super().handle(flag)
+            self.logger.info(
+                f"Successfully created and saved {len(self.product_objects)} dummy product(s) to the database."
+            )
+        return super().handle(flag, **kwargs)
 
     def create_product(self):
         for _ in range(700):

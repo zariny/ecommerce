@@ -1,7 +1,5 @@
-from .abstraction import AbstractHandler
+from .abstraction import *
 from catalogue.models import Category
-from faker import Faker
-import random
 
 
 class DummyCategoryHandler(AbstractHandler):
@@ -11,10 +9,11 @@ class DummyCategoryHandler(AbstractHandler):
         self.faker = Faker()
         self.tree = list()
 
-    def handle(self, flag):
+    def handle(self, flag, **kwargs):
         if flag:
             self.create_tree()
-            return super().handle(flag)
+            self.logger.info("Dummy category tree created and saved to database.")
+        return super().handle(flag, **kwargs)
 
     def data(self):
         slug = self.faker.unique.word().capitalize()

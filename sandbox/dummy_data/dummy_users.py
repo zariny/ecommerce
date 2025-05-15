@@ -13,10 +13,11 @@ class DummyUsersHandler(AbstractHandler):
         self.model = get_user_model()
         self.users = list()
 
-    def handle(self, flag):
+    def handle(self, flag, **kwargs):
         if flag:
             self.create_users()
-            return super().handle(flag)
+            self.logger.info(f"Successfully created and saved {len(self.users)} dummy product(s) to the database.")
+        return super().handle(flag, **kwargs)
 
     def create_users(self):
         for _ in range(500):
