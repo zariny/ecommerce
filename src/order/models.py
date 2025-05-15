@@ -35,7 +35,7 @@ class Order(DatedModel, ModelWithMetadata):
 
 class OrderLine(DatedModel):
     order = models.ForeignKey("order.order", on_delete=models.CASCADE, related_name="lines")
-    product = models.ForeignKey("products.Product", on_delete=models.CASCADE)
+    product = models.ForeignKey("products.Product", on_delete=models.SET_NULL, null=True)
     stockrecord = models.ForeignKey("inventory.StockRecord", on_delete=models.CASCADE, related_name="order_lines")
     title = models.CharField(max_length=255, blank=True)
     quantity = models.PositiveIntegerField(default=1)

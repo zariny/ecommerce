@@ -31,4 +31,4 @@ class OrderAdmin(AbstractPieChartModelAdmin):
 class OrderLineAdmin(AbstractPieChartModelAdmin):
     autocomplete_fields = ("product",)
     raw_id_fields = ("order", "stockrecord")
-    list_display = ("title", "quantity", "line_price_incl_tax")
+    list_display = ("product__title", "quantity", "line_price_incl_tax")
