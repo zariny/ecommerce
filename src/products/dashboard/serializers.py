@@ -1,10 +1,16 @@
-from typing import List
+from typing import List, Dict
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import ValidationError as RestValidationError
 from rest_framework import serializers
 from catalogue.models import Category
 from ..exceptions import CycleInheritanceError
 from .. import models
+
+
+class ProductMediaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductMedia
+        fields = ("pk", "image")
 
 
 class BaseProductAdminSerializer(serializers.ModelSerializer):
@@ -26,6 +32,7 @@ class BaseProductAdminSerializer(serializers.ModelSerializer):
 
 
     attributes = ProductAttributeValueSerializer(many=True, required=False, write_only=True)
+    first_image = serializers.SerializerMethodField(method_name="prefetched_image", label="First image")
     product_type = serializers.PrimaryKeyRelatedField(
         queryset=models.ProductClass.objects.all(),
         many=False,
@@ -38,6 +45,12 @@ class BaseProductAdminSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False
     )
+
+    def prefetched_image(self, obj) -> Dict | None:
+        medias = getattr(obj, "prefetched_medias", None)
+        if medias:
+            return ProductMediaSerializer(medias[0]).data
+        return None
 
     def update(self, instance, validated_data):
         attribute_values = validated_data.pop("attributes", [])

@@ -1,26 +1,34 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, Prefetch, OuterRef, Q, F
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
 from rest_framework import generics
 from rest_framework.response import Response
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters import rest_framework as filters
 from core.views import BaseAdminView, BaseAdminDetailView
 from core.authenticate import JWTCookiesBaseAuthentication
 from core.permissions import AdminAndModelLevelPermission
+from inventory.models import StockRecord
 from .. import models
 from . import serializers
 
 
-class ProductFilterByCategoryAdmin(filters.FilterSet):
-    category = filters.CharFilter(method="filter_category")
+class ProductAdminFilterSet(filters.FilterSet):
+    category = filters.CharFilter(method="category_filter")
+    in_stock = filters.BooleanFilter(method="in_stock_filter", label="In stock?")
 
-    def filter_category(self, queryset, name, value):
+    def category_filter(self, queryset, name, value):
         return queryset.filter(categories__slug__icontains=value).distinct()
+
+    def in_stock_filter(self, queryset, name, value):
+        if value:
+            subquery = StockRecord.objects.filter(product=OuterRef("pk"), num_in_stock__gt=F("num_allocated"))
+            queryset = queryset.filter(Exists(subquery))
+        return queryset
 
     class Meta:
         model = models.Product
-        fields = ("category",)
+        fields = ("category", "is_public")
 
 
 class ProductAdminView(BaseAdminView):
@@ -39,11 +47,17 @@ class ProductAdminView(BaseAdminView):
         Pagination: The pagination class used for listing.
         search_fields: Fields that support search (title, slug).
     """
-    queryset = models.Product.objects.only("pk", "title", "slug", "is_public", "updated_at")
+    media_prefetch = Prefetch(
+        lookup="medias",
+        queryset=models.ProductMedia.objects.filter(published=True).defer("caption", "metadata"),
+        to_attr="prefetched_medias"
+    )
+    queryset = models.Product.objects.only("pk", "title", "slug", "is_public", "updated_at").prefetch_related(media_prefetch)
     serializer_class = serializers.ProductAdminSerializer
-    filter_backends = (filters.DjangoFilterBackend, SearchFilter)
-    filterset_class = ProductFilterByCategoryAdmin
+    filter_backends = (filters.DjangoFilterBackend, SearchFilter, OrderingFilter)
+    filterset_class = ProductAdminFilterSet
     search_fields = ("title", "slug")
+    ordering_fields = ("updated_at", "created_at")
 
 
 class ProductDetailAdminView(BaseAdminDetailView):
