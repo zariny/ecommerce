@@ -14,6 +14,7 @@ class SortableModel(models.Model):
     sort_order = models.IntegerField(db_index=True, null=True)
 
     class Meta:
+        ordering = ("-sort_order",)
         abstract = True
 
 

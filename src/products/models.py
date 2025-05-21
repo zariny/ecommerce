@@ -181,9 +181,8 @@ class ProductMedia(ModelWithMetadata, SortableModel):
     caption = models.CharField(max_length=250, blank=True)
     published = models.BooleanField(default=False)
 
-    class Meta:
+    class Meta(SortableModel.Meta):
         app_label = "products"
-        ordering = ("sort_order", "pk")
 
 
 class ProductTranslate(TranslationModel):
