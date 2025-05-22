@@ -16,7 +16,7 @@ class SetAuthenticationCookiesMixin:
             key="refresh_token",
             value=str(refresh_token),
             httponly=True,
-            samesite="Lax",
+            samesite="None",
             max_age=refresh_token.lifetime.total_seconds()
         )
         self.set_access_token(response, refresh_token)
@@ -31,14 +31,14 @@ class SetAuthenticationCookiesMixin:
             key="access_token",
             value=str(access_token),
             httponly=True,
-            samesite="Lax",
+            samesite="None",
             max_age=access_token.lifetime.total_seconds()
         )
         response.set_cookie(
             key="expiry_date",
             value=access_token_expiry_local,
             httponly=False,
-            samesite="Lax",
+            samesite="None",
             max_age=refresh_token.lifetime.total_seconds()
         )
 
