@@ -1,17 +1,19 @@
 ## Django E-Commerce Project
 
 <p align="center">
-  <img src="https://cdn.worldvectorlogo.com/logos/django.svg" alt="Django" width="40"/> 
+  <img src="https://cdn.worldvectorlogo.com/logos/django.svg" alt="Django" width="40"/>
+  <img src="https://cdn.worldvectorlogo.com/logos/nuxt-2.svg" alt="Django" width="60"/> 
+
 </p>
 An advanced eCommerce platform built with Django, offering robust features, a seamless shopping experience, and scalability for businesses of all sizes.
 
 ## This project also has a UI design, which is available in [this repository.](https://github.com/taymakz/zariny-ecommerce-dashboard)
 
-<p align="center">
-  <img src="https://cdn.worldvectorlogo.com/logos/vue-9.svg" alt="Vue.js" width="40"/>
-</p>
-
 [This project](https://github.com/taymakz/zariny-ecommerce-dashboard) is the administrative interface for managing the e-commerce platform. It allows administrators to manage products.
+
+![uml](docs/one.png)
+![uml](docs/two.png)
+
 
 ## Table of Contents
 - [Documentation](#Documentation)
@@ -41,7 +43,8 @@ Follow these steps to set up the project locally:
    ```bash
       git clone https://github.com/zariny/ecommerce.git
       cd ecommerce
-2. If you have docker-compose you can run with only one command:
+
+2. If you have docker-compose you can run with only one command: <img src="https://cdn.worldvectorlogo.com/logos/docker-4.svg" alt="jwt" width="30" height="20"/>
    ```bash
       docker-compose up
    
