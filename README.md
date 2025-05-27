@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://cdn.worldvectorlogo.com/logos/django.svg" alt="Django" width="40"/>
-  <img src="https://cdn.worldvectorlogo.com/logos/nuxt-2.svg" alt="Django" width="60"/> 
+  <img src="https://cdn.worldvectorlogo.com/logos/nuxt-2.svg" alt="Django" width="50"/> 
 
 </p>
 An advanced eCommerce platform built with Django, offering robust features, a seamless shopping experience, and scalability for businesses of all sizes.
@@ -11,8 +11,8 @@ An advanced eCommerce platform built with Django, offering robust features, a se
 
 [This project](https://github.com/taymakz/zariny-ecommerce-dashboard) is the administrative interface for managing the e-commerce platform. It allows administrators to manage products.
 
-![uml](docs/one.png)
-![uml](docs/two.png)
+![uml](docs/dashboard_snapshot1.png)
+![uml](docs/dashboard_snapshot2.png)
 
 
 ## Table of Contents
