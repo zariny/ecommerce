@@ -48,6 +48,9 @@ Follow these steps to set up the project locally:
    ```bash
       docker-compose up
    
+- superuser email: root@email.com
+- superuser password: root
+   
 3. Or run project via manage.py locally:
    ```bash
       pip install -r requirements.txt
