@@ -1,25 +1,6 @@
+#version: '3.8'
+
 services:
-  postgres:
-    image: postgres:15
-    container_name: "postgres"
-    restart: always
-    environment:
-      POSTGRES_USER: "ecommerce"
-      POSTGRES_PASSWORD: "ecommerce"
-      POSTGRES_DB: "ecommerce"
-    networks:
-      - main
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7
-    restart: always
-    environment:
-      CACHE_BACKEND: "django.core.cache.backends.redis.RedisCache"
-      CACHE_LOCATION: "redis://127.0.0.1:6379"
-      CACHE_TIMEOUT: "300"
-
   django:
     build: .
     volumes:
@@ -31,23 +12,17 @@ services:
     networks:
       - "main"
     restart: always
-    depends_on:
-      - postgres
-      - redis
-    command: [ "sh", "-c", "python sandbox/manage.py migrate && python sandbox/manage.py runserver 0.0.0.0:8000" ]
-    environment:
-      DATABASE_ENGINE: "django.db.backends.postgresql"
-      DATABASE_USER: "ecommerce"
-      DATABASE_PASSWORD: "ecommerce"
-      DATABASE_NAME: "ecommerce"
-      DATABASE_HOST: "postgres" # reference to postgres service
-      DATABASE_PORT: "5432"
-      CACHE_BACKEND: "django.core.cache.backends.redis.RedisCache"
-      CACHE_LOCATION: "redis" # reference to redis service
-      CACHE_TIMEOUT: "300"
 
-volumes:
-  postgres_data:
+  nuxt-app:
+    build:
+      context: https://github.com/taymakz/zariny-ecommerce-dashboard.git
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
+    networks:
+      - "main"
+    restart: unless-stopped
 
 networks:
   main:
