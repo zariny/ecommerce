@@ -1,5 +1,5 @@
 from django.core.management import BaseCommand
-from sandbox.dummy_data import run
+from sandbox.dummy import run
 
 
 class Command(BaseCommand):
