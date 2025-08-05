@@ -28,7 +28,7 @@ sys.path.append(str(BASE_DIR))  # -> ecommerce directory
 
 # Take environment variables from .env file
 environ.Env.read_env(BASE_DIR / ".env")
-from core.languages import LANGUAGES as CORE_LANGUAGES
+from utils.languages import LANGUAGES as CORE_LANGUAGES
 
 
 # Quick-start development settings - unsuitable for production
@@ -58,11 +58,11 @@ INSTALLED_APPS = [
     # apps
     "account",
     "catalogue",
-    "core",
     "products",
     "basket",
     "inventory",
     "order",
+    "src",
     # third-party apps
     "channels",
     "rest_framework",
@@ -254,7 +254,7 @@ REST_FRAMEWORK = {
     # YOUR SETTINGS
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": (
-        "core.renderers.StructuredJSONRenderer",
+        "utils.renderers.StructuredJSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ),
 }
