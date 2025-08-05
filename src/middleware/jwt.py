@@ -4,7 +4,9 @@ from channels.middleware import BaseMiddleware
 from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 
+
 User = get_user_model()
+
 
 class JWTCookieAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
