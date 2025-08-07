@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
-from core.admin import AbstractPieChartModelAdmin
+from utils.admin import AbstractPieChartModelAdmin
 from . import models
 
 

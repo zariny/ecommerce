@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
-from core.models import ModelWithDescription
+from utils.models import (ModelWithDescription)
 
 
 class UserManager(BaseUserManager):

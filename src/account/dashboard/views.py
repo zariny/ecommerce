@@ -8,10 +8,10 @@ from rest_framework import filters, generics
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
-from core.permissions import AdminAndModelLevelPermission
-from core.authenticate import JWTCookiesBaseAuthentication
-from core.views import ListLimitOffsetPagination
-from core.filters import DateRangeFilterSet
+from utils.permissions import AdminAndModelLevelPermission
+from utils.authenticate import JWTCookiesBaseAuthentication
+from utils.views import ListLimitOffsetPagination
+from utils.filters import DateRangeFilterSet
 from . import serializers
 
 
