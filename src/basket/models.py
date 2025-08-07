@@ -1,7 +1,12 @@
 from django.db import models
-from core.models import DatedModel
-from core.utils import currencies
+from utils.models import DatedModel
 from uuid import uuid4
+
+
+currencies = (
+    ("EUR", "Euro €"),
+    ("USD", "US dollar $"),
+)
 
 
 class Basket(DatedModel):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from core.admin import AbstractPieChartModelAdmin
+from utils.admin import AbstractPieChartModelAdmin
 from . import models
 
 
