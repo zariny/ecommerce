@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-from core.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel, SortableModel
+from utils.models import ModelWithDescription, BaseSeoModel, ModelWithMetadata, TranslationModel, SortableModel
 from .utils import VALUE_TYPE_CHOICE
 from .fields import DynamicValueField
 from .validation import validate_no_cycles

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from . import models
 from .forms import ProductAttributeValueAdminForm
-from core.admin import AbstractPieChartModelAdmin
+from utils.admin import AbstractPieChartModelAdmin
 from catalogue.models import ProductCategory
 
 
@@ -109,7 +109,7 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
 
 @admin.register(models.ProductAttribute)
 class ProductAttributeAdmin(AbstractPieChartModelAdmin):
-    change_list_template = "core/pie_chart.html"
+    change_list_template = "utils/pie_chart.html"
     list_display = ("name", "value_type", "require")
     search_fields = ("name", "slug")
     list_filter = (IsRequireFilter,)

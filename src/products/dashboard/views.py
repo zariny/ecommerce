@@ -5,9 +5,9 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters import rest_framework as filters
-from core.views import BaseAdminView, BaseAdminDetailView
-from core.authenticate import JWTCookiesBaseAuthentication
-from core.permissions import AdminAndModelLevelPermission
+from utils.views import BaseAdminView, BaseAdminDetailView
+from utils.authenticate import JWTCookiesBaseAuthentication
+from utils.permissions import AdminAndModelLevelPermission
 from inventory.models import StockRecord
 from .. import models
 from . import serializers

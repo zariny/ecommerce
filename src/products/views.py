@@ -2,7 +2,7 @@ from rest_framework import generics
 from rest_framework.filters import SearchFilter
 from django.db.models import Prefetch
 from django_filters import rest_framework as filters
-from core.views import ListLimitOffsetPagination
+from utils.views import ListLimitOffsetPagination
 from catalogue.models import Category
 from . import serializers
 from . import models
