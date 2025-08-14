@@ -1,6 +1,11 @@
 from django.db import models
-from core.models import DatedModel
-from core.utils import currencies
+from utils.models import DatedModel
+
+
+currencies = (
+    ("EUR", "Euro €"),
+    ("USD", "US dollar $"),
+)
 
 
 class StockRecord(DatedModel):
