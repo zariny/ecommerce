@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
-from src.core.models import BaseSeoModel, ModelWithDescription, TranslationModel
+from utils.models import BaseSeoModel, ModelWithDescription, TranslationModel
 from treebeard.mp_tree import MP_Node, MP_NodeQuerySet
 
 
