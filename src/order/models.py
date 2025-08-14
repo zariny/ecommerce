@@ -1,5 +1,5 @@
 from django.db import models
-from core.models import DatedModel, ModelWithMetadata
+from utils.models import DatedModel, ModelWithMetadata
 from uuid import uuid4
 
 

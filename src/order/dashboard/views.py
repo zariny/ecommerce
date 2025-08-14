@@ -2,9 +2,9 @@ from django.db.models import functions, Sum
 from rest_framework import generics
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from core.permissions import AdminAndModelLevelPermission
-from core.authenticate import JWTCookiesBaseAuthentication
-from core.filters import DateRangeFilterSet
+from utils.permissions import AdminAndModelLevelPermission
+from utils.authenticate import JWTCookiesBaseAuthentication
+from utils.filters import DateRangeFilterSet
 from .. import models
 from . import serializers
 
