@@ -3,7 +3,7 @@ import typing
 
 
 class AbstractPieChartModelAdmin(admin.ModelAdmin):
-    change_list_template = "core/pie_chart.html"
+    change_list_template = "pie_chart.html"
 
     @typing.final
     def changelist_view(self, request, extra_context=None):
