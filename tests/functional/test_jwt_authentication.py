@@ -2,7 +2,7 @@ from unittest.mock import patch, MagicMock
 from django.db.models.expressions import result
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
-from core.authenticate import JWTCookiesBaseAuthentication
+from utils.authenticate import JWTCookiesBaseAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 
 
