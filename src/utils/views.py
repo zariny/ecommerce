@@ -1,9 +1,9 @@
 import asyncio
 from typing import AsyncGenerator
 from django.http import StreamingHttpResponse
-from django.views import View
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework import generics
+from rest_framework.views import APIView
 from .server_sent_event import ServerSentEvent, Event
 from . import permissions, authenticate
 
@@ -27,9 +27,8 @@ class BaseAdminDetailView(generics.RetrieveUpdateDestroyAPIView):
 SSE_CONTENT_TYPE = 'text/event-stream'
 
 
-class ServerSentEventView(View):
-    def dispatch(self, request, *args, **kwargs):
-        self.sse = ServerSentEvent()
+class ServerSentEventView(APIView):
+    def get(self, request, *args, **kwargs):
         res =  StreamingHttpResponse(self._stream(request, *args, **kwargs), content_type=SSE_CONTENT_TYPE)
         res.headers["Cache-Control"] = "no-cache"
         res.headers["Connection"] = "keep-alive"
