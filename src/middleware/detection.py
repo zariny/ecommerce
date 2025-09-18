@@ -2,7 +2,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 
 
-class JWTTokenCookieDetection():
+class JWTTokenDetection():
     def __init__(self, get_response):
         self.get_response = get_response
 
