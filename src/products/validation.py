@@ -1,6 +1,6 @@
+from __future__ import annotations
 from typing import List, Set
 from .exceptions import CycleInheritanceError
-from __future__ import annotations
 
 
 ProductClass = ...
