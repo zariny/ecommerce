@@ -5,3 +5,5 @@ __pycache__
 db.sqlite3
 *.log*
 lab*
+.env
+.pytest_cache
