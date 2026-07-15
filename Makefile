@@ -19,6 +19,10 @@ superuser:
 shell:
 	$(MANAGE) shell
 
+env:
+	@test -f .env || cp .env.example .env
+	@echo "✅ .env file is ready!"
+
 help:
 	@echo ""
 	@echo "Available commands:"
@@ -28,4 +32,5 @@ help:
 	@echo "  make mm APP=app_name"
 	@echo "  make superuser"
 	@echo "  make shell"
+	@echo "  make env"
 	@echo ""
