@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from utils.models import (ModelWithDescription)
-
+from utils.languages import LANGUAGES
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -44,7 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin, ModelWithDescription):
     date_joined = models.DateTimeField("date joined", default=timezone.now, editable=False)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
     avatar = models.ImageField(upload_to="user-avatars", blank=True, null=True)
-    language_code = models.CharField(max_length=35, choices=settings.CORE_LANGUAGES, default=settings.LANGUAGE_CODE)
+    language_code = models.CharField(max_length=35, choices=LANGUAGES, default=settings.LANGUAGE_CODE)
 
     USERNAME_FIELD = "email"
     objects = UserManager()

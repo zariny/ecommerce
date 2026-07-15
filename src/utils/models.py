@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from utils.languages import LANGUAGES
 
 
 class BaseSeoModel(models.Model):
@@ -19,7 +20,7 @@ class SortableModel(models.Model):
 
 
 class BaseTranslateModel(models.Model):
-    language_code = models.CharField(max_length=35, choices=settings.CORE_LANGUAGES, default=settings.LANGUAGE_CODE)
+    language_code = models.CharField(max_length=35, choices=LANGUAGES, default=settings.LANGUAGE_CODE)
 
     _default_presentation = "Not Translated"
 
