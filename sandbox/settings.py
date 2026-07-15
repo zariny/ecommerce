@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "channels",
     "corsheaders",
     "treebeard",
+    "strawberry_django",
 ]
 
 MIDDLEWARE = [
