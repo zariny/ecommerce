@@ -5,8 +5,11 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "channels>=4.3.2",
     "django>=6.0.7",
     "django-cors-headers>=4.9.0",
     "django-environ>=0.14.0",
     "django-treebeard>=5.3.0",
+    "pillow>=12.3.0",
+    "uvicorn[standard]>=0.51.0",
 ]
