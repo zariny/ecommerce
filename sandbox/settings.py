@@ -59,6 +59,9 @@ INSTALLED_APPS = [
     "strawberry_django",
 ]
 
+if DEBUG:
+    INSTALLED_APPS += ["debug_toolbar"]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -69,6 +72,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+if DEBUG:
+    MIDDLEWARE += [
+        "strawberry_django.middlewares.debug_toolbar.DebugToolbarMiddleware",
+    ]
 
 
 ROOT_URLCONF = "sandbox.urls"
@@ -243,4 +251,9 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
+}
+
+
+DEBUG_TOOLBAR_CONFIG = {
+    "USE_SHADOW_DOM": False,
 }
