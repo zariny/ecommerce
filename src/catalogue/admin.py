@@ -10,14 +10,14 @@ class IsPublicFilter(admin.SimpleListFilter):
 
     def lookups(self, request, model_admin):
         return [
-            ('true', 'Public'),
-            ('false', 'Non-Public'),
+            ("true", "Public"),
+            ("false", "Non-Public"),
         ]
 
     def queryset(self, request, queryset):
-        if self.value() == 'true':
+        if self.value() == "true":
             return queryset.filter(is_public=True)
-        elif self.value() == 'false':
+        elif self.value() == "false":
             return queryset.filter(is_public=False)
 
 
@@ -28,29 +28,29 @@ class CategoryAdmin(TreeAdmin):
     list_filter = (IsPublicFilter,)
 
     fieldsets = (
-        ("Overview", {
-            'fields': (
-                'name',
-                'slug',
-                'description',
-                'meta_title',
-                'meta_description',
-                'is_public',
-                'ancestors_are_public'
-            )
-        }),
-        ('Background', {
-            'fields': (
-                'background',
-                'background_caption',
-            )
-        }),
-        ('Tree Structure', {
-            'fields': (
-                '_position',
-                '_ref_node_id'
-            )
-        }),
+        (
+            "Overview",
+            {
+                "fields": (
+                    "name",
+                    "slug",
+                    "description",
+                    "meta_title",
+                    "meta_description",
+                    "is_public",
+                    "ancestors_are_public",
+                )
+            },
+        ),
+        (
+            "Background",
+            {
+                "fields": (
+                    "background",
+                    "background_caption",
+                )
+            },
+        ),
     )
 
     prepopulated_fields = {"slug": ("name",)}
