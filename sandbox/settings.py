@@ -21,10 +21,6 @@ sys.path.append(str(BASE_DIR))  # -> ecommerce directory
 # Take environment variables from .env file
 environ.Env.read_env(BASE_DIR / ".env")
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
 
@@ -51,7 +47,6 @@ INSTALLED_APPS = [
     "basket",
     "inventory",
     "order",
-    "src",
     # third-party apps
     "channels",
     "corsheaders",
@@ -256,4 +251,10 @@ CHANNEL_LAYERS = {
 
 DEBUG_TOOLBAR_CONFIG = {
     "USE_SHADOW_DOM": False,
+}
+
+
+STRAWBERRY_DJANGO = {
+    "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
+    "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
 }
