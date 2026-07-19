@@ -1,13 +1,11 @@
-from typing import List, Tuple
-
+from django.db import models
 
 """List of all languages supported"""
 
 
-LANGUAGES : List[Tuple[str, str]] = [
-    ("en", "English"),
-    ("fa", "Persian"),
-    ("fr", "French"),
-    ("de", "German"),
-    ("ar", "Arabic"),
-]
+class Language(models.TextChoices):
+    EN = "en", "English"
+    FA = "fa", "Persian"
+    FR = "fr", "French"
+    DE = "de", "German"
+    AR = "ar", "Arabic"
