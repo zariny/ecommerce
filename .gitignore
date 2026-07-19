@@ -7,3 +7,4 @@ db.sqlite3
 lab*
 .env
 .pytest_cache
+.python-version
