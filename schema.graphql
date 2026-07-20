@@ -1,3 +1,380 @@
+directive @oneOf on INPUT_OBJECT
+
+"""Provides common SEO metadata fields."""
+interface BaseSeoModelType {
+  """SEO title for the page."""
+  metaTitle: String
+
+  """SEO meta description."""
+  metaDescription: String
+}
+
+input BoolBaseFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: Boolean
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [Boolean!]
+}
+
+"""
+Category(id, slug, meta_title, meta_description, metadata, description, path, depth, numchild, name, updated_at, background, background_caption, is_public, ancestors_are_public)
+"""
+input CategoryFilterType {
+  isPublic: BoolBaseFilterLookup
+  ancestorsArePublic: BoolBaseFilterLookup
+  slug: StrFilterLookup
+  updatedAt: DatetimeFilterLookup
+  AND: CategoryFilterType
+  OR: CategoryFilterType
+  NOT: CategoryFilterType
+  DISTINCT: Boolean
+}
+
+input CategoryOrderType @oneOf {
+  updatedAt: Ordering
+
+  """Order by tree hierarchy structure (materialized path)"""
+  hierarchy: Ordering
+}
+
+"""
+Category(id, slug, meta_title, meta_description, metadata, description, path, depth, numchild, name, updated_at, background, background_caption, is_public, ancestors_are_public)
+"""
+type CategoryType implements Node & BaseSeoModelType & ModelWithDescriptionType {
+  """The Globally Unique ID of this object"""
+  id: ID!
+
+  """SEO title for the page."""
+  metaTitle: String
+
+  """SEO meta description."""
+  metaDescription: String
+
+  """Additional structured metadata."""
+  metadata: JSON
+
+  """Detailed description."""
+  description: String!
+  name: String!
+  slug: String!
+  updatedAt: DateTime
+  isPublic: Boolean!
+  ancestorsArePublic: Boolean!
+  background: DjangoImageType
+  backgroundCaption: String!
+
+  """Children of this node"""
+  children: [CategoryType!]!
+
+  """Ancestors of this node"""
+  ancestors: [CategoryType!]!
+}
+
+"""A connection to a list of items."""
+type CategoryTypeCursorConnection {
+  """Pagination data for this connection"""
+  pageInfo: PageInfo!
+
+  """Contains the nodes in this connection"""
+  edges: [CategoryTypeCursorEdge!]!
+
+  """Total quantity of existing nodes."""
+  totalCount: Int!
+}
+
+"""An edge in a connection."""
+type CategoryTypeCursorEdge {
+  """A cursor for use in pagination"""
+  cursor: String!
+
+  """The item at the end of the edge"""
+  node: CategoryType!
+}
+
+"""Date (isoformat)"""
+scalar Date
+
+input DateComparisonFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: Date
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [Date!]
+
+  """Greater than. Filter will be skipped on `null` value"""
+  gt: Date
+
+  """Greater than or equal to. Filter will be skipped on `null` value"""
+  gte: Date
+
+  """Less than. Filter will be skipped on `null` value"""
+  lt: Date
+
+  """Less than or equal to. Filter will be skipped on `null` value"""
+  lte: Date
+
+  """Inclusive range test (between)"""
+  range: DateRangeLookup
+}
+
+input DateRangeLookup {
+  start: Date = null
+  end: Date = null
+}
+
+"""Date with time (isoformat)"""
+scalar DateTime
+
+input DatetimeFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: DateTime
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [DateTime!]
+
+  """Greater than. Filter will be skipped on `null` value"""
+  gt: DateTime
+
+  """Greater than or equal to. Filter will be skipped on `null` value"""
+  gte: DateTime
+
+  """Less than. Filter will be skipped on `null` value"""
+  lt: DateTime
+
+  """Less than or equal to. Filter will be skipped on `null` value"""
+  lte: DateTime
+
+  """Inclusive range test (between)"""
+  range: DatetimeRangeLookup
+  year: IntComparisonFilterLookup
+  month: IntComparisonFilterLookup
+  day: IntComparisonFilterLookup
+  weekDay: IntComparisonFilterLookup
+  isoWeekDay: IntComparisonFilterLookup
+  week: IntComparisonFilterLookup
+  isoYear: IntComparisonFilterLookup
+  quarter: IntComparisonFilterLookup
+  hour: IntComparisonFilterLookup
+  minute: IntComparisonFilterLookup
+  second: IntComparisonFilterLookup
+  date: DateComparisonFilterLookup
+  time: TimeComparisonFilterLookup
+}
+
+input DatetimeRangeLookup {
+  start: DateTime = null
+  end: DateTime = null
+}
+
+type DjangoImageType {
+  name: String!
+  path: String!
+  size: Int!
+  url: String!
+  width: Int!
+  height: Int!
+}
+
+input IntComparisonFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: Int
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [Int!]
+
+  """Greater than. Filter will be skipped on `null` value"""
+  gt: Int
+
+  """Greater than or equal to. Filter will be skipped on `null` value"""
+  gte: Int
+
+  """Less than. Filter will be skipped on `null` value"""
+  lt: Int
+
+  """Less than or equal to. Filter will be skipped on `null` value"""
+  lte: Int
+
+  """Inclusive range test (between)"""
+  range: IntRangeLookup
+}
+
+input IntRangeLookup {
+  start: Int = null
+  end: Int = null
+}
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf).
+"""
+scalar JSON @specifiedBy(url: "https://ecma-international.org/wp-content/uploads/ECMA-404_2nd_edition_december_2017.pdf")
+
+"""Adds a free-form description."""
+interface ModelWithDescriptionType {
+  """Additional structured metadata."""
+  metadata: JSON
+
+  """Detailed description."""
+  description: String!
+}
+
+"""An object with a Globally Unique ID"""
+interface Node {
+  """The Globally Unique ID of this object"""
+  id: ID!
+}
+
+enum Ordering {
+  ASC
+  ASC_NULLS_FIRST
+  ASC_NULLS_LAST
+  DESC
+  DESC_NULLS_FIRST
+  DESC_NULLS_LAST
+}
+
+"""Information to aid in pagination."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
 type Query {
-  test: String!
+  categories(
+    filters: CategoryFilterType
+    ordering: [CategoryOrderType!]! = []
+
+    """Returns the items in the list that come before the specified cursor."""
+    before: String = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    after: String = null
+
+    """Returns the first n items from the list."""
+    first: Int = null
+
+    """Returns the items in the list that come after the specified cursor."""
+    last: Int = null
+  ): CategoryTypeCursorConnection!
+  node(
+    """The ID of the object."""
+    id: ID!
+  ): Node!
+  nodes(
+    """The IDs of the objects."""
+    ids: [ID!]!
+  ): [Node!]!
+}
+
+input StrFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: String
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [String!]
+
+  """Case-insensitive exact match. Filter will be skipped on `null` value"""
+  iExact: String
+
+  """
+  Case-sensitive containment test. Filter will be skipped on `null` value
+  """
+  contains: String
+
+  """
+  Case-insensitive containment test. Filter will be skipped on `null` value
+  """
+  iContains: String
+
+  """Case-sensitive starts-with. Filter will be skipped on `null` value"""
+  startsWith: String
+
+  """Case-insensitive starts-with. Filter will be skipped on `null` value"""
+  iStartsWith: String
+
+  """Case-sensitive ends-with. Filter will be skipped on `null` value"""
+  endsWith: String
+
+  """Case-insensitive ends-with. Filter will be skipped on `null` value"""
+  iEndsWith: String
+
+  """
+  Case-sensitive regular expression match. Filter will be skipped on `null` value
+  """
+  regex: String
+
+  """
+  Case-insensitive regular expression match. Filter will be skipped on `null` value
+  """
+  iRegex: String
+}
+
+"""Time (isoformat)"""
+scalar Time
+
+input TimeComparisonFilterLookup {
+  """Exact match. Filter will be skipped on `null` value"""
+  exact: Time
+
+  """Assignment test. Filter will be skipped on `null` value"""
+  isNull: Boolean
+
+  """
+  Exact match of items in a given list. Filter will be skipped on `null` value
+  """
+  inList: [Time!]
+
+  """Greater than. Filter will be skipped on `null` value"""
+  gt: Time
+
+  """Greater than or equal to. Filter will be skipped on `null` value"""
+  gte: Time
+
+  """Less than. Filter will be skipped on `null` value"""
+  lt: Time
+
+  """Less than or equal to. Filter will be skipped on `null` value"""
+  lte: Time
+
+  """Inclusive range test (between)"""
+  range: TimeRangeLookup
+}
+
+input TimeRangeLookup {
+  start: Time = null
+  end: Time = null
 }
