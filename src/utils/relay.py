@@ -1,10 +1,10 @@
 import strawberry
-from strawberry_django.relay import DjangoCursorConnection
+from strawberry_django import BaseFilterLookup, relay
 from strawberry.relay.types import NodeType
 
 
 @strawberry.type(name="CursorConnection")
-class CursorConnection(DjangoCursorConnection[NodeType]):
+class CursorConnection(relay.DjangoCursorConnection[NodeType]):
     DEFAULT_FIRST = 10
     """
     HACK Pagination exists to limit how much data a client can pull per
@@ -32,3 +32,8 @@ class CursorConnection(DjangoCursorConnection[NodeType]):
             last=last,
             **kwargs,
         )
+
+
+@strawberry.input
+class BaseFilter:
+    id: BaseFilterLookup[strawberry.relay.GlobalID]

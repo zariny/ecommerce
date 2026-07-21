@@ -1,10 +1,11 @@
+from typing import Self
+import strawberry_django
+from asgiref.sync import sync_to_async
 from strawberry import auto, relay
 from strawberry.types import Info
-import strawberry_django
-from .. import models
-from typing import Self
-from asgiref.sync import sync_to_async
 from utils.types import BaseSeoModelType, ModelWithDescriptionType
+from utils.relay import BaseFilter
+from .. import models
 
 
 async def resolve_tree(instance, method_name: str):
@@ -13,7 +14,7 @@ async def resolve_tree(instance, method_name: str):
 
 
 @strawberry_django.filter_type(models.Category, lookups=True)
-class CategoryFilterType:
+class CategoryFilterType(BaseFilter):
     is_public: auto
     ancestors_are_public: auto
     slug: auto
@@ -52,19 +53,20 @@ class CategoryType(relay.Node, BaseSeoModelType, ModelWithDescriptionType):
     ancestors_are_public: auto
     background: auto
     background_caption: auto
+    numchild: auto
     # product: auto
     # translations: auto
 
     @strawberry_django.field(
-        description="Children of this node",
+        description="all direct children of this node",
         only=["path", "depth", "numchild"],
     )
-    async def children(self, info: Info) -> list[Self]:
+    async def children(self, info: Info) -> list[Self]:  # FIXME n+1 query problem :(
         return await resolve_tree(self, "get_children")
 
     @strawberry_django.field(
         description="Ancestors of this node",
         only=["path", "depth", "numchild"],
     )
-    async def ancestors(self, info: Info) -> list[Self]:
+    async def ancestors(self, info: Info) -> list[Self]:  # FIXME n+1 query problem :(
         return await resolve_tree(self, "get_ancestors")
