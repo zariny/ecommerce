@@ -26,33 +26,6 @@ class CategoryAdmin(TreeAdmin):
     form = movenodeform_factory(Category)
     list_display = ("name", "is_public", "ancestors_are_public")
     list_filter = (IsPublicFilter,)
-
-    fieldsets = (
-        (
-            "Overview",
-            {
-                "fields": (
-                    "name",
-                    "slug",
-                    "description",
-                    "meta_title",
-                    "meta_description",
-                    "is_public",
-                    "ancestors_are_public",
-                )
-            },
-        ),
-        (
-            "Background",
-            {
-                "fields": (
-                    "background",
-                    "background_caption",
-                )
-            },
-        ),
-    )
-
     prepopulated_fields = {"slug": ("name",)}
 
 
