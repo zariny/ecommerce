@@ -1,11 +1,22 @@
-from typing import Self
+from typing import TYPE_CHECKING, Annotated, Optional, Self
+
 import strawberry_django
 from asgiref.sync import sync_to_async
-from strawberry import auto, relay
+from strawberry import UNSET, auto, lazy, relay
+from strawberry.relay import GlobalID
 from strawberry.types import Info
-from utils.types import BaseSeoModelType, ModelWithDescriptionType
-from utils.relay import BaseFilter
+from strawberry_django import BaseFilterLookup
+
+from utils.types import (
+    BaseSeoModelType,
+    ModelWithDescriptionType,
+    TranslationModelType,
+)
+
 from .. import models
+
+if TYPE_CHECKING:
+    from products.dashboard.types import ProductType
 
 
 async def resolve_tree(instance, method_name: str):
@@ -14,9 +25,11 @@ async def resolve_tree(instance, method_name: str):
 
 
 @strawberry_django.filter_type(models.Category, lookups=True)
-class CategoryFilterType(BaseFilter):
+class CategoryFilterType:
+    id: Optional[BaseFilterLookup[GlobalID]] = UNSET
     is_public: auto
     ancestors_are_public: auto
+    name: auto
     slug: auto
     updated_at: auto
 
@@ -33,13 +46,9 @@ class CategoryOrderType:
 
 
 @strawberry_django.type(models.CategoryTranslation)
-class CategoryTranslation:
-    id: auto
+class CategoryTranslationType(relay.Node, TranslationModelType):
     name: auto
     description: auto
-    meta_title: auto
-    meta_description: auto
-    language_code: auto
 
 
 @strawberry_django.type(
@@ -54,8 +63,8 @@ class CategoryType(relay.Node, BaseSeoModelType, ModelWithDescriptionType):
     background: auto
     background_caption: auto
     numchild: auto
-    # product: auto
-    # translations: auto
+    products: list[Annotated["ProductType", lazy("products.dashboard.types")]]
+    translations: list[CategoryTranslationType]
 
     @strawberry_django.field(
         description="all direct children of this node",
