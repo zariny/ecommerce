@@ -4,6 +4,8 @@ from django.db import models
 
 
 class Language(models.TextChoices):
+    """Supported languages for translatable content."""
+
     EN = "en", "English"
     FA = "fa", "Persian"
     FR = "fr", "French"

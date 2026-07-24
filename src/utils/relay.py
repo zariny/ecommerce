@@ -1,6 +1,6 @@
 import strawberry
-from strawberry_django import BaseFilterLookup, relay
 from strawberry.relay.types import NodeType
+from strawberry_django import relay
 
 
 @strawberry.type(name="CursorConnection")
@@ -32,8 +32,3 @@ class CursorConnection(relay.DjangoCursorConnection[NodeType]):
             last=last,
             **kwargs,
         )
-
-
-@strawberry.input
-class BaseFilter:
-    id: BaseFilterLookup[strawberry.relay.GlobalID]
