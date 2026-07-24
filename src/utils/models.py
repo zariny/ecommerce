@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django_choices_field import TextChoicesField
 from utils.languages import Language
 
 
@@ -40,9 +41,8 @@ class SortableModel(models.Model):
 class BaseTranslateModel(models.Model):
     """Stores the language of a translated record."""
 
-    language_code = models.CharField(
-        max_length=35,
-        choices=Language.choices,
+    language_code = TextChoicesField(
+        choices_enum=Language,
         default=settings.LANGUAGE_CODE,
         help_text="Language of this translation.",
     )
