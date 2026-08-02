@@ -9,12 +9,11 @@ from utils.models import (
     TranslationModel,
 )
 
+from . import managers
 from .attr_container import ProductAttributeContainer
-from .exceptions import CycleInheritanceError
 from .fields import DynamicValueField
-from .managers import ProductQuerySet
 from .utils import VALUE_TYPE_CHOICE
-from .validation import validate_no_cycles
+from .validators import ProductClassGraphValidator
 
 
 class ProductClass(ModelWithMetadata):
@@ -36,12 +35,16 @@ class ProductClass(ModelWithMetadata):
     abstract = models.BooleanField(
         default=False
     )  # If True, this product class cannot have any product
-    bases = models.ManyToManyField(
+    parents = models.ManyToManyField(
         "self",
         symmetrical=False,
-        through="products.ProductClassRelation",
-        related_name="subclasses",
+        through="products.ProductClassEdge",
+        through_fields=("child", "parent"),
+        related_name="children",
+        blank=True,
     )
+
+    objects = managers.ProductClassManager()
 
     class Meta:
         app_label = "products"
@@ -53,80 +56,70 @@ class ProductClass(ModelWithMetadata):
     def __repr__(self):
         return f"<{type(self).__name__}> obj {self.title or self.slug}"
 
-    def get_ancestors(self, and_self=False) -> set:
-        ancestors = set()
-        explore = list(self.bases.all())
-        while explore:
-            current = explore.pop()
-            if current.pk not in ancestors:
-                ancestors.add(current.pk)
-                explore.extend(current.bases.all())
-        if and_self:
-            ancestors.add(self.pk)
-        return ancestors
+    def get_ancestors(self):
+        rows = ProductClass.objects.get_ancestor_ids(self.pk)
+        ordered_ids = [row["parent_id"] for row in rows]
+        # حفظ ترتیب depth با preserved ordering
+        preserved = models.Case(
+            *[models.When(pk=pk, then=pos) for pos, pk in enumerate(ordered_ids)]
+        )
+        return ProductClass.objects.filter(pk__in=ordered_ids).order_by(preserved)
 
-    def get_descendants(self, and_self=False) -> set:
-        descendants = set()
-        explore = list(self.subclasses.all())
-        while explore:
-            current = explore.pop()
-            if current.pk not in descendants:
-                descendants.add(current.pk)
-                explore.extend(current.subclasses.all())
-        if and_self:
-            descendants.add(self.pk)
-        return descendants
+    def get_descendants(self):
+        rows = ProductClass.objects.get_descendant_ids(self.pk)
+        ordered_ids = [row["child_id"] for row in rows]
+        preserved = models.Case(
+            *[models.When(pk=pk, then=pos) for pos, pk in enumerate(ordered_ids)]
+        )
+        return ProductClass.objects.filter(pk__in=ordered_ids).order_by(preserved)
 
-    def get_attributes(self, **filters):
-        attributes = self.attributes.model.objects.filter(
-            product_class__in=self.get_ancestors(and_self=True), **filters
-        ).distinct()
-        return attributes
+    # def get_attributes(self, **filters):
+    #     attributes = self.attributes.model.objects.filter(
+    #         product_class__in=self.get_ancestors(and_self=True), **filters
+    #     ).distinct()
+    #     return attributes
 
 
-class ProductClassRelation(models.Model):
-    subclass = models.ForeignKey(
-        "products.ProductClass", on_delete=models.CASCADE, related_name="base_relations"
+class ProductClassEdge(models.Model):
+    """
+    Represents a directed edge between two ProductClass nodes.
+
+    This model implements an adjacency list representation of a
+    Directed Acyclic Graph (DAG).
+    """
+
+    parent = models.ForeignKey(
+        "products.ProductClass",
+        on_delete=models.CASCADE,
+        related_name="outgoing_edges",
     )
-    base = models.ForeignKey(
-        "products.ProductClass", on_delete=models.CASCADE, related_name="sub_relations"
+    child = models.ForeignKey(
+        "products.ProductClass",
+        on_delete=models.CASCADE,
+        related_name="incoming_edges",
     )
 
     class Meta:
-        unique_together = (("base", "subclass"),)
+        constraints = [  # noqa: RUF012
+            models.UniqueConstraint(
+                fields=["parent", "child"],
+                name="unique_product_class_edge",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(parent=models.F("child")),
+                name="prevent_self_edge",
+            ),
+        ]
         app_label = "products"
 
     def __str__(self):
-        return f"{self.subclass} inherits from {self.base}"
-
-    def cycle_relation_validation(self) -> None:
-        if self.base == self.subclass:
-            raise ValidationError("Self-inheritance is not allowed.")
-
-        # Any two instances of the ProductClass should have only one relationship with each other
-        if (
-            self.base.pk
-            and self.subclass.pk
-            and (
-                type(self)
-                ._default_manager.filter(base=self.subclass, subclass=self.base)
-                .exists()
-            )
-        ):
-            raise ValidationError(
-                "The inverse of this relationship has already been stored."
-            )
-
-        try:
-            validate_no_cycles(
-                base_product_kls=self.base, sub_product_kls=self.subclass
-            )
-        except CycleInheritanceError as e:
-            raise ValidationError(message=e.message)
+        return f"{self.child} --> {self.parent}"
 
     def clean(self):
         super().clean()
-        self.cycle_relation_validation()
+        ProductClassGraphValidator.validate_edge(
+            parent_id=self.parent_id, child_id=self.child_id
+        )
 
 
 class Product(BaseSeoModel, ModelWithDescription):
@@ -153,7 +146,7 @@ class Product(BaseSeoModel, ModelWithDescription):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-    objects = ProductQuerySet.as_manager()
+    objects = managers.ProductManager()
 
     class Meta:
         app_label = "products"
