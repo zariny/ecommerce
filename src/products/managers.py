@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import connection, models
 from django.db.models.constants import LOOKUP_SEP
 
 
@@ -13,10 +13,10 @@ class ProductAttributeFilterDict(dict):
                 self[key] = (None, value)
 
     def _Q_object(self, lookup, value):
-        kwargs = dict()
+        kwargs = {}
         key = "attribute_values__value__value"
         if lookup:
-            key = "%s%s%s" % (key, LOOKUP_SEP, lookup)
+            key = f"{key}{LOOKUP_SEP}{lookup}"
         kwargs[key] = value
         return models.Q(**kwargs)
 
@@ -26,15 +26,12 @@ class ProductAttributeFilterDict(dict):
             selected_values = self._Q_object(lookup, value)
             if not selected_values:
                 return queryset.none()
-            qs = qs.filter(
-                selected_values,
-                attribute_values__attribute__slug=slug
-            )
+            qs = qs.filter(selected_values, attribute_values__attribute__slug=slug)
 
         return qs
 
 
-class ProductQuerySet(models.QuerySet):
+class ProductManager(models.Manager):
     def filter_by_attribute(self, **kwargs):
         """
         Allows querying by attribute:
@@ -46,3 +43,65 @@ class ProductQuerySet(models.QuerySet):
 
     def browsable(self):
         return self.filter(is_public=True)
+
+
+class ProductClassManager(models.Manager):
+    def get_ancestor_ids(self, product_class_id: int):  # XXX neads test
+        sql = """
+        WITH RECURSIVE ancestors AS (
+            SELECT
+                parent_id,
+                1 AS depth
+            FROM products_productclassedge
+            WHERE child_id = %s
+
+            UNION ALL
+
+            SELECT
+                edge.parent_id,
+                a.depth + 1
+            FROM products_productclassedge edge
+            INNER JOIN ancestors a
+                ON edge.child_id = a.parent_id
+        )
+        SELECT
+            parent_id,
+            MIN(depth) AS depth
+        FROM ancestors
+        GROUP BY parent_id
+        ORDER BY depth ASC;
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(sql, [product_class_id])
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    def get_descendant_ids(self, product_class_id: int):
+        sql = """
+            WITH RECURSIVE descendants AS (
+                SELECT
+                    child_id,
+                    1 AS depth
+                FROM products_productclassedge
+                WHERE parent_id = %s
+
+                UNION ALL
+
+                SELECT
+                    edge.child_id,
+                    d.depth + 1
+                FROM products_productclassedge edge
+                INNER JOIN descendants d
+                    ON edge.parent_id = d.child_id
+            )
+            SELECT
+                child_id,
+                MIN(depth) AS depth
+            FROM descendants
+            GROUP BY child_id
+            ORDER BY depth ASC;
+            """
+
+    def check_cycle(self, parent_id: int, child_id: int) -> bool:
+        pass
