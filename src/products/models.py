@@ -92,11 +92,13 @@ class ProductClassEdge(models.Model):
         "products.ProductClass",
         on_delete=models.CASCADE,
         related_name="outgoing_edges",
+        help_text="Parent class that this class inherits from.",
     )
     child = models.ForeignKey(
         "products.ProductClass",
         on_delete=models.CASCADE,
         related_name="incoming_edges",
+        help_text="The class receiving inheritance.",
     )
 
     class Meta:
