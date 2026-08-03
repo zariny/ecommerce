@@ -13,7 +13,6 @@ from . import managers
 from .attr_container import ProductAttributeContainer
 from .fields import DynamicValueField
 from .utils import VALUE_TYPE_CHOICE
-from .validators import ProductClassGraphValidator
 
 
 class ProductClass(ModelWithMetadata):
@@ -56,28 +55,31 @@ class ProductClass(ModelWithMetadata):
     def __repr__(self):
         return f"<{type(self).__name__}> obj {self.title or self.slug}"
 
-    def get_ancestors(self):
+    def get_ancestors(self, include_self=False):
         rows = ProductClass.objects.get_ancestor_ids(self.pk)
         ordered_ids = [row["parent_id"] for row in rows]
-        # حفظ ترتیب depth با preserved ordering
+        if include_self:
+            ordered_ids = [self.pk] + ordered_ids
         preserved = models.Case(
             *[models.When(pk=pk, then=pos) for pos, pk in enumerate(ordered_ids)]
         )
         return ProductClass.objects.filter(pk__in=ordered_ids).order_by(preserved)
 
-    def get_descendants(self):
+    def get_descendants(self, include_self=False):
         rows = ProductClass.objects.get_descendant_ids(self.pk)
         ordered_ids = [row["child_id"] for row in rows]
+        if include_self:
+            ordered_ids = [self.pk] + ordered_ids
         preserved = models.Case(
             *[models.When(pk=pk, then=pos) for pos, pk in enumerate(ordered_ids)]
         )
         return ProductClass.objects.filter(pk__in=ordered_ids).order_by(preserved)
 
-    # def get_attributes(self, **filters):
-    #     attributes = self.attributes.model.objects.filter(
-    #         product_class__in=self.get_ancestors(and_self=True), **filters
-    #     ).distinct()
-    #     return attributes
+    def get_attributes(self, **filters):
+        attributes = self.attributes.model.objects.filter(
+            product_class__in=self.get_ancestors(include_self=True), **filters
+        ).distinct()
+        return attributes
 
 
 class ProductClassEdge(models.Model):
@@ -119,9 +121,17 @@ class ProductClassEdge(models.Model):
 
     def clean(self):
         super().clean()
-        ProductClassGraphValidator.validate_edge(
-            parent_id=self.parent_id, child_id=self.child_id
-        )
+        self.validate_edge(parent_id=self.parent_id, child_id=self.child_id)
+
+    @classmethod
+    def validate_edge(cls, parent_id, child_id):
+        """
+        Validates ProductClass DAG constraints.
+        """
+        if parent_id == child_id:
+            raise ValidationError("A ProductClass cannot inherit from itself.")
+        if ProductClass.objects.check_cycle(parent_id, child_id):
+            raise ValidationError("This relation creates a cycle.")
 
 
 class Product(BaseSeoModel, ModelWithDescription):
