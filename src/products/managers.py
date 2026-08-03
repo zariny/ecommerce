@@ -31,7 +31,7 @@ class ProductAttributeFilterDict(dict):
         return qs
 
 
-class ProductManager(models.Manager):
+class ProductManager(models.Manager):  # XXX test required
     def filter_by_attribute(self, **kwargs):
         """
         Allows querying by attribute:
@@ -46,7 +46,7 @@ class ProductManager(models.Manager):
 
 
 class ProductClassManager(models.Manager):
-    def get_ancestor_ids(self, product_class_id: int):  # XXX neads test
+    def get_ancestor_ids(self, product_class_id: int):
         sql = """
         WITH RECURSIVE ancestors AS (
             SELECT
@@ -102,6 +102,38 @@ class ProductClassManager(models.Manager):
             GROUP BY child_id
             ORDER BY depth ASC;
             """
+        with connection.cursor() as cursor:
+            cursor.execute(sql, [product_class_id])
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     def check_cycle(self, parent_id: int, child_id: int) -> bool:
-        pass
+        """
+        Checks whether adding parent -> child creates a cycle.
+
+        A cycle exists if child can already reach parent.
+        """
+        sql = """
+        WITH RECURSIVE descendants AS (
+            SELECT
+                child_id
+            FROM products_productclassedge
+            WHERE parent_id = %s
+
+            UNION
+
+            SELECT
+                edge.child_id
+            FROM products_productclassedge edge
+            INNER JOIN descendants d
+                ON edge.parent_id = d.child_id
+        )
+        SELECT 1
+        FROM descendants
+        WHERE child_id = %s
+        LIMIT 1;
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(sql, [child_id, parent_id])
+            return cursor.fetchone() is not None
