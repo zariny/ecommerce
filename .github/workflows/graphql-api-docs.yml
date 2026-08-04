@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir -p site
           cp docs/index.html site/index.html
-          cp schema.json site/schema.json
+          cp docs/schema.json site/schema.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

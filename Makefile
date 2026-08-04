@@ -40,8 +40,8 @@ env:
 schema:
 	$(MANAGE) export_schema sandbox.schema.dashboard:schema > schema.graphql
 
-json-schema:
-	uv run python scripts/export_schema_json.py
+json-schema: schema
+	uv run scripts/schema_to_introspection.py schema.graphql docs/schema.json
 
 ## Help
 help:
