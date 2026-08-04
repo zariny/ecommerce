@@ -1,4 +1,4 @@
-name: Build Documentation
+name: Build GraphQL Documentation
 
 on:
   push:
@@ -17,13 +17,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -36,10 +36,11 @@ jobs:
       - name: Generate GraphQL schema
         run: make schema
 
-      # - name: Prepare documentation
-      #   run: |
-      #     cp schema.graphql docs/schema.graphql
-      #     uv run mkdocs build
+      - name: Prepare Pages artifact
+        run: |
+          mkdir -p site
+          cp docs/index.html site/index.html
+          cp schema.graphql site/schema.graphql
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
