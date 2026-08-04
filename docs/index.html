@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>GraphQL Voyager</title>
 
-    <link rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.css">
 
     <script src="https://cdn.jsdelivr.net/npm/react@17/umd/react.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@17/umd/react-dom.production.min.js"></script>
@@ -13,23 +13,20 @@
 
 <body>
 
-<div id="voyager"></div>
+    <div id="voyager"></div>
 
-<script>
+    <script>
 
-fetch("./schema.json")
-.then(r => r.text())
-.then(schema => {
+        fetch("./schema.json")
+            .then(r => r.json())
+            .then(schema => {
+                GraphQLVoyager.init(document.getElementById("voyager"), {
+                    introspection: schema
+                });
+            });
 
-    GraphQLVoyager.init(document.getElementById("voyager"), {
-        introspection: {
-            __schema: schema
-        }
-    });
-
-});
-
-</script>
+    </script>
 
 </body>
+
 </html>
