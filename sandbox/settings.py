@@ -80,7 +80,6 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
-            BASE_DIR / "sandbox" / "templates",
             BASE_DIR / "src" / "templates",
         ],
         "APP_DIRS": True,
@@ -257,4 +256,5 @@ DEBUG_TOOLBAR_CONFIG = {
 STRAWBERRY_DJANGO = {
     "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
     "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
+    "MAP_AUTO_ID_AS_GLOBAL_ID": True,
 }
