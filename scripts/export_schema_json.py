@@ -29,7 +29,7 @@ if result.errors:
 
 with open("schema.json", "w", encoding="utf-8") as f:
     json.dump(
-        result.data,
+        {"data": result.data},
         f,
         ensure_ascii=False,
         indent=2,

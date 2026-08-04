@@ -20,11 +20,15 @@
         fetch("./schema.json")
             .then(r => r.json())
             .then(schema => {
-                GraphQLVoyager.init(document.getElementById("voyager"), {
-                    introspection: schema
-                });
-            });
 
+                GraphQLVoyager.init(
+                    document.getElementById("voyager"),
+                    {
+                        introspection: schema
+                    }
+                );
+
+            });
     </script>
 
 </body>
