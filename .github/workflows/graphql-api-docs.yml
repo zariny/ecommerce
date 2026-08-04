@@ -34,13 +34,13 @@ jobs:
         run: cp .env.example .env
 
       - name: Generate GraphQL schema
-        run: make schema
+        run: make json-schema
 
       - name: Prepare Pages artifact
         run: |
           mkdir -p site
           cp docs/index.html site/index.html
-          cp schema.graphql site/schema.graphql
+          cp schema.json site/schema.json
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
