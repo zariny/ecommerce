@@ -3,7 +3,7 @@
 MANAGE := uv run sandbox/manage.py
 APP ?=
 
-.PHONY: help dev runserver check mm migrate superuser shell test env schema
+.PHONY: help dev runserver check mm migrate superuser shell test env schema json-schema erd doc docs-build
 
 ## Development
 dev:
@@ -38,11 +38,20 @@ env:
 	@echo "✅ .env is ready."
 
 schema:
-	$(MANAGE) export_schema sandbox.schema.dashboard:schema > schema.graphql
+	$(MANAGE) export_schema sandbox.schema.dashboard:schema > docs/schema.graphql
 
 json-schema: schema
-	uv run scripts/schema_to_introspection.py schema.graphql docs/schema.json
+	uv run scripts/schema_to_introspection.py docs/schema.graphql docs/graphql/schema.json
 
+erd:
+	$(MANAGE) generate_erd -d mermaid -o docs/models/erd.mmd
+
+## Docs
+docs: json-schema erd
+	uv run --group docs mkdocs serve
+
+docs-build: json-schema erd
+	uv run --group docs mkdocs build
 ## Help
 help:
 	@echo ""
