@@ -8,3 +8,4 @@ lab*
 .env
 .pytest_cache
 .python-version
+site
