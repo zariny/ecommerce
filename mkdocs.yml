@@ -1,0 +1,77 @@
+site_name: E-commerce Documentation
+site_description: Django Backend Documentation
+site_url: https://zariny.github.io/ecommerce/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: System theme
+
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Dark mode
+
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Light mode
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+nav:
+  - Home: index.md
+  - API: api.md
+  - Backend:
+      - Authentication: backend/authentication.md
+  - GraphQL:
+      - Schema: graphql/index.md
+  - Model Layer:
+      - Schema: models/index.md
+
+hooks:
+  - docs/hooks/django_setup.py
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["."]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: true
+            merge_init_into_class: true
+
+            show_if_no_docstring: true
+            docstring_section_style: table
+
+            members_order: source
+            show_signature_annotations: true
+            separate_signature: true
+            show_bases: true
+            show_inheritance_diagram: true
+
+            filters: ["!^_"]
+
+            show_labels: true
