@@ -19,5 +19,11 @@ dependencies = [
 [dependency-groups]
 dev = [
     "django-debug-toolbar>=7.0.0",
+    "django-erd-generator>=0.1.7",
     "ipython>=9.15.0",
+]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.7",
+    "mkdocstrings[python]>=1.0.6",
 ]
