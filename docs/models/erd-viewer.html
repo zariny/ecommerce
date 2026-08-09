@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Model ERD</title>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6/dist/svg-pan-zoom.min.js"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-family: sans-serif;
+    background: #fafafa;
+}
+
+header {
+    height: 60px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #4051b5;
+    color: white;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+header .actions {
+    display: flex;
+    gap: 8px;
+}
+
+header a,
+header button {
+    color: white;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, .4);
+    background: transparent;
+    font-size: 14px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+header a:hover,
+header button:hover {
+    background: rgba(255, 255, 255, .15);
+}
+
+#diagram {
+    height: calc(100vh - 60px);
+    width: 100vw;
+    display: block;
+    cursor: grab;
+    overflow: hidden;
+}
+
+#diagram:active {
+    cursor: grabbing;
+}
+
+#diagram svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#status {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #888;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Model ERD</h1>
+    <div class="actions">
+        <button id="zoomOut">−</button>
+        <button id="reset">Reset</button>
+        <button id="zoomIn">+</button>
+        <a class="back" href="index.md" onclick="history.back();return false;">← Back</a>
+    </div>
+</header>
+
+<div id="diagram"></div>
+<div id="status">Loading...</div>
+
+<script>
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+
+    let panZoomInstance = null;
+    const statusEl = document.getElementById('status');
+    const diagramEl = document.getElementById('diagram');
+
+    fetch('erd.mmd')
+        .then(r => {
+            if (!r.ok) throw new Error('erd.mmd not found (HTTP ' + r.status + ')');
+            return r.text();
+        })
+        .then(text => mermaid.render('erd-svg', text))
+        .then(({ svg }) => {
+            diagramEl.innerHTML = svg;
+
+            const svgEl = diagramEl.querySelector('svg');
+            svgEl.removeAttribute('width');
+            svgEl.removeAttribute('height');
+            svgEl.style.removeProperty('max-width');
+            svgEl.setAttribute('width', '100%');
+            svgEl.setAttribute('height', '100%');
+
+            panZoomInstance = svgPanZoom(svgEl, {
+                zoomEnabled: true,
+                controlIconsEnabled: false,
+                fit: true,
+                center: true,
+                minZoom: 0.1,
+                maxZoom: 15,
+            });
+
+            window.addEventListener('resize', () => {
+                panZoomInstance.resize();
+                panZoomInstance.fit();
+                panZoomInstance.center();
+            });
+
+            statusEl.style.display = 'none';
+        })
+        .catch(err => {
+            statusEl.textContent = 'Error: ' + err.message;
+            statusEl.style.color = 'crimson';
+            console.error(err);
+        });
+
+    document.getElementById('zoomIn').onclick = () => panZoomInstance && panZoomInstance.zoomIn();
+    document.getElementById('zoomOut').onclick = () => panZoomInstance && panZoomInstance.zoomOut();
+    document.getElementById('reset').onclick = () => {
+        if (!panZoomInstance) return;
+        panZoomInstance.resetZoom();
+        panZoomInstance.center();
+    };
+</script>
+
+</body>
+
+</html>
