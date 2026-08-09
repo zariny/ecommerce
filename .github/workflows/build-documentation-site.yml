@@ -1,4 +1,4 @@
-name: Build GraphQL Documentation
+name: Build Documentation Site
 
 on:
   push:
@@ -12,7 +12,6 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -28,30 +27,21 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: uv sync
+        run: uv sync --all-groups
 
       - name: Create .env file
         run: cp .env.example .env
 
-      - name: Generate GraphQL schema
-        run: make json-schema
-
-      - name: Prepare Pages artifact
-        run: |
-          mkdir -p site
-          cp docs/index.html site/index.html
-          cp docs/schema.json site/schema.json
+      - name: Build documentation site
+        run: make docs-build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
 
-
   deploy:
-
     needs: build
-
     runs-on: ubuntu-latest
 
     environment:
