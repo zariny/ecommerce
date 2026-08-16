@@ -47,7 +47,10 @@ class AttributeInputType(models.TextChoices):
 
 class Attribute(ModelWithMetadata):
     product_class = models.ManyToManyField(
-        "products.ProductClass", related_name="attributes", blank=True
+        "products.ProductClass",
+        through="products.AttributeProductClass",
+        related_name="attributes",
+        blank=True,
     )
     name = models.CharField(max_length=250)
     slug = models.SlugField(max_length=128, unique=True)
@@ -94,12 +97,12 @@ class AttributeProductClass(SortableModel):
         on_delete=models.CASCADE,
         related_name="attributeproductclass",
     )
-    product_type = models.ForeignKey(
+    product_class = models.ForeignKey(
         "products.ProductClass",
         on_delete=models.CASCADE,
         related_name="attributeproductclass",
     )
 
     class Meta:
-        unique_together = (("attribute", "product_type"),)
+        unique_together = (("attribute", "product_class"),)
         ordering = ("sort_order", "pk")

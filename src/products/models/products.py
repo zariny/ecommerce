@@ -31,6 +31,11 @@ class Product(BaseSeoModel, ModelWithDescription):
         through="catalogue.ProductCategory",
         related_name="products",
     )
+    attribute_values = models.ManyToManyField(
+        "products.AttributeValue",
+        through="products.AssignedProductAttributeValue",
+        related_name="products",
+    )
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
