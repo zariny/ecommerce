@@ -56,6 +56,14 @@ class AttributeValue(models.Model):
         null=True,
     )
 
+    reference_variant = models.ForeignKey(
+        "products.ProductVariant",
+        on_delete=models.CASCADE,
+        related_name="references",
+        blank=True,
+        null=True,
+    )
+
     class Meta:
         unique_together = (("label", "attribute"),)
 
