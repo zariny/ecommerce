@@ -1,15 +1,15 @@
 from django.contrib import admin
-from utils.admin import AbstractPieChartModelAdmin
+
 from . import models
 
 
 @admin.register(models.Basket)
-class BasketAdmin(AbstractPieChartModelAdmin):
+class BasketAdmin(admin.ModelAdmin):
     raw_id_fields = ("owner",)
     search_fields = ("pk", "token")
 
 
 @admin.register(models.Line)
-class LineAdmin(AbstractPieChartModelAdmin):
+class LineAdmin(admin.ModelAdmin):
     raw_id_fields = ("product",)
     autocomplete_fields = ("basket", "stockrecord")

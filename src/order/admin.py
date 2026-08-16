@@ -1,10 +1,10 @@
 from django.contrib import admin
-from utils.admin import AbstractPieChartModelAdmin
+
 from . import models
 
 
 @admin.register(models.Order)
-class OrderAdmin(AbstractPieChartModelAdmin):
+class OrderAdmin(admin.ModelAdmin):
     autocomplete_fields = ("user",)
     readonly_fields = ("shipping_code", "date_updated", "date_created")
     fieldsets = (
@@ -28,7 +28,7 @@ class OrderAdmin(AbstractPieChartModelAdmin):
 
 
 @admin.register(models.OrderLine)
-class OrderLineAdmin(AbstractPieChartModelAdmin):
+class OrderLineAdmin(admin.ModelAdmin):
     autocomplete_fields = ("product",)
     raw_id_fields = ("order", "stockrecord")
     list_display = ("product__title", "quantity", "line_price_incl_tax")

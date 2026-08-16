@@ -1,10 +1,8 @@
 from django.contrib import admin
 
 from catalogue.models import ProductCategory
-from utils.admin import AbstractPieChartModelAdmin
 
 from . import models
-from .forms import ProductAttributeValueAdminForm
 
 
 class IsPublicFilter(admin.SimpleListFilter):
@@ -63,14 +61,8 @@ class IsRequiredShipping(admin.SimpleListFilter):
             return queryset.filter(require_shipping=False)
 
 
-class ProductAttributeValueInline(admin.TabularInline):
-    model = models.ProductAttributeValue
-    form = ProductAttributeValueAdminForm
-    extra = 1
-
-
 class ProductAttributeInline(admin.TabularInline):
-    model = models.ProductAttribute.product_class.through
+    model = models.Attribute.product_class.through
     extra = 1
 
 
@@ -87,30 +79,29 @@ class ProductCategoryInline(admin.StackedInline):
 
 
 @admin.register(models.Product)
-class ProductAdmin(AbstractPieChartModelAdmin):
+class ProductAdmin(admin.ModelAdmin):
     list_display = ("title", "is_public", "updated_at")
     search_fields = ("title",)
     list_filter = (IsPublicFilter,)
-    inlines = (ProductCategoryInline, ProductAttributeValueInline)
+    inlines = (ProductCategoryInline,)
 
 
-@admin.register(models.ProductAttributeValue)
+@admin.register(models.AttributeValue)
 class ProductAttributeValueAdmin(admin.ModelAdmin):
-    list_display = ("attribute", "data_type", "product")
-    form = ProductAttributeValueAdminForm
+    list_display = ("attribute", "data_type")
 
 
-@admin.register(models.ProductAttribute)
-class ProductAttributeAdmin(AbstractPieChartModelAdmin):
+@admin.register(models.Attribute)
+class ProductAttributeAdmin(admin.ModelAdmin):
     change_list_template = "utils/pie_chart.html"
-    list_display = ("name", "value_type", "require")
+    list_display = ("name", "input_type", "value_required")
     search_fields = ("name", "slug")
     list_filter = (IsRequireFilter,)
     filter_horizontal = ("product_class",)
 
 
 @admin.register(models.ProductClass)
-class ProductClassAdmin(AbstractPieChartModelAdmin):
+class ProductClassAdmin(admin.ModelAdmin):
     list_display = ("title", "abstract", "require_shipping", "track_stock")
     inlines = (ParentProductClassInline, ProductAttributeInline)
     list_filter = (
@@ -126,6 +117,6 @@ class ProductMediaAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.ProductClassEdge)
-admin.site.register(models.ProductTranslate)
-admin.site.register(models.ProductAttributeTranslate)
-admin.site.register(models.ProductAttributeValueTranslate)
+admin.site.register(models.ProductTranslation)
+admin.site.register(models.AttributeTranslation)
+admin.site.register(models.AttributeValueTranslation)

@@ -1,11 +1,11 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
-from utils.admin import AbstractPieChartModelAdmin
+
 from . import models
 
 
 @admin.register(models.User)
-class UserAdmin(AuthUserAdmin, AbstractPieChartModelAdmin):
+class UserAdmin(AuthUserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
