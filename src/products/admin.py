@@ -93,11 +93,10 @@ class ProductAttributeValueAdmin(admin.ModelAdmin):
 
 @admin.register(models.Attribute)
 class ProductAttributeAdmin(admin.ModelAdmin):
-    change_list_template = "utils/pie_chart.html"
     list_display = ("name", "input_type", "value_required")
     search_fields = ("name", "slug")
     list_filter = (IsRequireFilter,)
-    filter_horizontal = ("product_class",)
+    # filter_horizontal = ("product_class",)
 
 
 @admin.register(models.ProductClass)
