@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # apps
     "account",
+    "permissions",
     "catalogue",
     "products",
     "basket",
@@ -260,4 +261,5 @@ STRAWBERRY_DJANGO = {
     "FIELD_DESCRIPTION_FROM_HELP_TEXT": True,
     "TYPE_DESCRIPTION_FROM_MODEL_DOCSTRING": True,
     "MAP_AUTO_ID_AS_GLOBAL_ID": True,
+    "GENERATE_ENUMS_FROM_CHOICES": True,
 }
