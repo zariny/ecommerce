@@ -32,6 +32,9 @@ superuser:
 test:
 	$(MANAGE) test
 
+sync_permissions:
+	$(MANAGE) sync_permissions
+
 ## Utilities
 env:
 	@test -f .env || cp .env.example .env
