@@ -2,6 +2,10 @@
 
 This page provides an interactive visualization of the project's **GraphQL schema**.
 
+<a href="schema.graphql" class="md-button md-button--primary">
+    Download Schema.graphql fiel
+</a>
+
 The schema is explored using **[GraphQL Voyager](https://github.com/graphql-kit/graphql-voyager)**, which provides a visual representation of GraphQL types, fields, arguments, and relationships between them.
 
 !!! info "Generated schema"
