@@ -6,128 +6,313 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('products', '0002_attributevalue_refreence_category_product_categories'),
+        ("products", "0002_attributevalue_refreence_category_product_categories"),
     ]
 
-    operations = [
+    operations = [  # noqa: RUF012
         migrations.CreateModel(
-            name='AssignedVariantAttribute',
+            name="AssignedVariantAttribute",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
             ],
         ),
         migrations.RenameField(
-            model_name='attributeproductclass',
-            old_name='product_type',
-            new_name='product_class',
+            model_name="attributeproductclass",
+            old_name="product_type",
+            new_name="product_class",
         ),
         migrations.AlterUniqueTogether(
-            name='attributeproductclass',
-            unique_together={('attribute', 'product_class')},
+            name="attributeproductclass",
+            unique_together={("attribute", "product_class")},
         ),
-        migrations.AlterField(
-            model_name='attribute',
-            name='product_class',
-            field=models.ManyToManyField(blank=True, related_name='attributes', through='products.AttributeProductClass', to='products.productclass'),
+        migrations.RemoveField(
+            model_name="attribute",
+            name="product_class",
+        ),
+        migrations.AddField(
+            model_name="attribute",
+            name="product_class",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="attributes",
+                through="products.AttributeProductClass",
+                to="products.productclass",
+            ),
         ),
         migrations.CreateModel(
-            name='AssignedVariantAttributeValue',
+            name="AssignedVariantAttributeValue",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sort_order', models.IntegerField(db_index=True, help_text='Controls the display order.', null=True)),
-                ('assignment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='variantvalueassignment', to='products.assignedvariantattribute')),
-                ('value', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='variantvalueassignment', to='products.attributevalue')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.IntegerField(
+                        db_index=True,
+                        help_text="Controls the display order.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "assignment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="variantvalueassignment",
+                        to="products.assignedvariantattribute",
+                    ),
+                ),
+                (
+                    "value",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="variantvalueassignment",
+                        to="products.attributevalue",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('sort_order', 'pk'),
+                "ordering": ("sort_order", "pk"),
             },
         ),
         migrations.AddField(
-            model_name='assignedvariantattribute',
-            name='values',
-            field=models.ManyToManyField(blank=True, related_name='variantassignments', through='products.AssignedVariantAttributeValue', to='products.attributevalue'),
+            model_name="assignedvariantattribute",
+            name="values",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="variantassignments",
+                through="products.AssignedVariantAttributeValue",
+                to="products.attributevalue",
+            ),
         ),
         migrations.CreateModel(
-            name='AttributeVariant',
+            name="AttributeVariant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sort_order', models.IntegerField(db_index=True, help_text='Controls the display order.', null=True)),
-                ('variant_selection', models.BooleanField(default=False)),
-                ('attribute', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attributevariant', to='products.attribute')),
-                ('product_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attributevariant', to='products.productclass')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.IntegerField(
+                        db_index=True,
+                        help_text="Controls the display order.",
+                        null=True,
+                    ),
+                ),
+                ("variant_selection", models.BooleanField(default=False)),
+                (
+                    "attribute",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attributevariant",
+                        to="products.attribute",
+                    ),
+                ),
+                (
+                    "product_type",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attributevariant",
+                        to="products.productclass",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('sort_order', 'pk'),
+                "ordering": ("sort_order", "pk"),
             },
         ),
         migrations.AddField(
-            model_name='assignedvariantattribute',
-            name='assignment',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='variantassignments', to='products.attributevariant'),
+            model_name="assignedvariantattribute",
+            name="assignment",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="variantassignments",
+                to="products.attributevariant",
+            ),
         ),
         migrations.CreateModel(
-            name='ProductVariant',
+            name="ProductVariant",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('sort_order', models.IntegerField(db_index=True, help_text='Controls the display order.', null=True)),
-                ('metadata', models.JSONField(blank=True, default=dict, help_text='Additional structured metadata.', null=True)),
-                ('sku', models.CharField(blank=True, max_length=255, null=True, unique=True)),
-                ('name', models.CharField(blank=True, max_length=255)),
-                ('track_inventory', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),
-                ('updated_at', models.DateTimeField(auto_now=True, db_index=True)),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='variants', to='products.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "sort_order",
+                    models.IntegerField(
+                        db_index=True,
+                        help_text="Controls the display order.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "metadata",
+                    models.JSONField(
+                        blank=True,
+                        default=dict,
+                        help_text="Additional structured metadata.",
+                        null=True,
+                    ),
+                ),
+                (
+                    "sku",
+                    models.CharField(
+                        blank=True, max_length=255, null=True, unique=True
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=255)),
+                ("track_inventory", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True, db_index=True)),
+                ("updated_at", models.DateTimeField(auto_now=True, db_index=True)),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="variants",
+                        to="products.product",
+                    ),
+                ),
             ],
             options={
-                'ordering': ('sort_order', 'sku'),
+                "ordering": ("sort_order", "sku"),
             },
         ),
         migrations.AddField(
-            model_name='attributevariant',
-            name='assigned_variants',
-            field=models.ManyToManyField(blank=True, related_name='attributesrelated', through='products.AssignedVariantAttribute', through_fields=('assignment', 'variant'), to='products.productvariant'),
+            model_name="attributevariant",
+            name="assigned_variants",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="attributesrelated",
+                through="products.AssignedVariantAttribute",
+                through_fields=("assignment", "variant"),
+                to="products.productvariant",
+            ),
         ),
         migrations.AddField(
-            model_name='assignedvariantattributevalue',
-            name='variant',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='attributevalues', to='products.productvariant'),
+            model_name="assignedvariantattributevalue",
+            name="variant",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attributevalues",
+                to="products.productvariant",
+            ),
         ),
         migrations.AddField(
-            model_name='assignedvariantattribute',
-            name='variant',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attributes', to='products.productvariant'),
+            model_name="assignedvariantattribute",
+            name="variant",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="attributes",
+                to="products.productvariant",
+            ),
         ),
         migrations.AddField(
-            model_name='attributevalue',
-            name='reference_variant',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='references', to='products.productvariant'),
+            model_name="attributevalue",
+            name="reference_variant",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="references",
+                to="products.productvariant",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='attributevariant',
-            unique_together={('attribute', 'product_type')},
+            name="attributevariant",
+            unique_together={("attribute", "product_type")},
         ),
         migrations.AlterUniqueTogether(
-            name='assignedvariantattributevalue',
-            unique_together={('value', 'assignment')},
+            name="assignedvariantattributevalue",
+            unique_together={("value", "assignment")},
         ),
         migrations.AlterUniqueTogether(
-            name='assignedvariantattribute',
-            unique_together={('variant', 'assignment')},
+            name="assignedvariantattribute",
+            unique_together={("variant", "assignment")},
         ),
         migrations.CreateModel(
-            name='ProductVariantTranslation',
+            name="ProductVariantTranslation",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('meta_title', models.CharField(blank=True, help_text='SEO title for the page.', max_length=70, null=True)),
-                ('meta_description', models.CharField(blank=True, help_text='SEO meta description.', max_length=300, null=True)),
-                ('language_code', django_choices_field.fields.TextChoicesField(choices=[('en', 'English'), ('fa', 'Persian'), ('fr', 'French'), ('de', 'German'), ('ar', 'Arabic')], default='en', help_text='Language of this translation.', max_length=2)),
-                ('name', models.CharField(blank=True, max_length=255)),
-                ('variant', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='translations', to='products.productvariant')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "meta_title",
+                    models.CharField(
+                        blank=True,
+                        help_text="SEO title for the page.",
+                        max_length=70,
+                        null=True,
+                    ),
+                ),
+                (
+                    "meta_description",
+                    models.CharField(
+                        blank=True,
+                        help_text="SEO meta description.",
+                        max_length=300,
+                        null=True,
+                    ),
+                ),
+                (
+                    "language_code",
+                    django_choices_field.fields.TextChoicesField(
+                        choices=[
+                            ("en", "English"),
+                            ("fa", "Persian"),
+                            ("fr", "French"),
+                            ("de", "German"),
+                            ("ar", "Arabic"),
+                        ],
+                        default="en",
+                        help_text="Language of this translation.",
+                        max_length=2,
+                    ),
+                ),
+                ("name", models.CharField(blank=True, max_length=255)),
+                (
+                    "variant",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="translations",
+                        to="products.productvariant",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('name', 'language_code')},
+                "unique_together": {("name", "language_code")},
             },
         ),
     ]
