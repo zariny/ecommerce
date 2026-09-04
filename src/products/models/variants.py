@@ -22,6 +22,9 @@ class ProductVariant(SortableModel, ModelWithMetadata):
     class Meta:
         ordering = ("sort_order", "sku")
 
+    def __str__(self):
+        return self.sku or self.name or self.product
+
 
 class ProductVariantTranslation(TranslationModel):
     variant = models.ForeignKey(
@@ -59,6 +62,9 @@ class AssignedVariantAttributeValue(SortableModel):
         unique_together = (("value", "assignment"),)
         ordering = ("sort_order", "pk")
 
+    def __str__(self):
+        return f"Variant({self.variant}) has value {self.value.label}"
+
 
 class AssignedVariantAttribute(models.Model):
     """Associate a product type attribute and selected values to a given variant."""
@@ -81,12 +87,15 @@ class AssignedVariantAttribute(models.Model):
     class Meta:
         unique_together = (("variant", "assignment"),)
 
+    def __str__(self):
+        return f"Variant({self.variant}) has values {list(*self.values.values_list('label'))}"
+
 
 class AttributeVariant(SortableModel):
     attribute = models.ForeignKey(
         "products.Attribute", related_name="attributevariant", on_delete=models.CASCADE
     )
-    product_type = models.ForeignKey(
+    product_class = models.ForeignKey(
         "products.ProductClass",
         related_name="attributevariant",
         on_delete=models.CASCADE,
@@ -101,5 +110,8 @@ class AttributeVariant(SortableModel):
     variant_selection = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = (("attribute", "product_type"),)
+        unique_together = (("attribute", "product_class"),)
         ordering = ("sort_order", "pk")
+
+    def __str__(self):
+        return f"Variant({self.assigned_variants.all()}) & ProductClass({self.product_class}) --has--> Attribute({self.attribute})"

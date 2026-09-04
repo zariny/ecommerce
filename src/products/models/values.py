@@ -67,9 +67,12 @@ class AttributeValue(models.Model):
     class Meta:
         unique_together = (("label", "attribute"),)
 
+    def __str__(self):
+        return self.label or self.value
+
     @property
     def data_type(self):
-        return self.attribute.data_type
+        return self.attribute.input_type
 
 
 class AttributeValueTranslation(TranslationModel):
