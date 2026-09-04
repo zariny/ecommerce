@@ -1,6 +1,7 @@
-from django.db import models
 from django.conf import settings
+from django.db import models
 from django_choices_field import TextChoicesField
+
 from utils.languages import Language
 
 

@@ -15,12 +15,21 @@ class BaseSeoModelType:
     meta_description: strawberry.auto
 
 
-@strawberry_django.interface(models.ModelWithDescription)
-class ModelWithDescriptionType:
+@strawberry_django.interface(models.ModelWithMetadata)
+class ModelWithMetadataType:
     metadata: strawberry.auto
+
+
+@strawberry_django.interface(models.ModelWithDescription)
+class ModelWithDescriptionType(ModelWithMetadataType):
     description: strawberry.auto
 
 
 @strawberry_django.interface(models.TranslationModel)
 class TranslationModelType(BaseSeoModelType):
     language_code: strawberry.auto
+
+
+@strawberry_django.interface(models.SortableModel)
+class SortableModelType:
+    sort_order: strawberry.auto
