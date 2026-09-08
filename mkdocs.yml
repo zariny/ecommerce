@@ -39,7 +39,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - API: api.md
   - Backend:
       - Authentication: backend/authentication.md
   - GraphQL:

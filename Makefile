@@ -41,10 +41,10 @@ env:
 	@echo "✅ .env is ready."
 
 schema:
-	$(MANAGE) export_schema sandbox.schema.dashboard:schema > docs/schema.graphql
+	$(MANAGE) export_schema sandbox.schema.dashboard:schema > docs/graphql/schema.graphql
 
 json-schema: schema
-	uv run scripts/schema_to_introspection.py docs/schema.graphql docs/graphql/schema.json
+	uv run scripts/schema_to_introspection.py docs/graphql/schema.graphql docs/graphql/schema.json
 
 erd:
 	$(MANAGE) generate_erd -d mermaid -o docs/models/erd.mmd
