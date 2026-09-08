@@ -26,3 +26,12 @@ class Permission(FieldExtension):
         raise DjangoNoPermission(
             f"You don't have these permissions for this action: {', '.join(perm.name for perm in denied)}"
         )
+
+
+def with_permission(permissions):
+    def wrapper(cls):
+        for field in cls.__strawberry_definition__.fields:
+            field.extensions = [*(field.extensions or []), Permission(permissions)]
+        return cls
+
+    return wrapper

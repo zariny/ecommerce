@@ -1,9 +1,5 @@
 import enum
-from collections.abc import Callable
-
-from collections.abc import Iterable
-
-from .models import Permission
+from collections.abc import Iterable, Callable
 from account.models import User
 
 
@@ -92,13 +88,10 @@ async def check_grant_permissions(
     if isinstance(permission, BasePermission):
         permission = {permission}
 
-    resolved = await Permission.auser_permissions(user)
-    code_names = [i.codename for i in resolved]
-
     for perm in permission:
         if not perm.is_grant:
             raise TypeError(f"{perm} is not a GrantPerm")
-        if perm.db_value not in code_names:
+        if perm.db_value not in user.token_permissions:
             denied.add(perm)
 
     return denied
