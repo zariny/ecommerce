@@ -19,8 +19,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.append(str(BASE_DIR / "src"))
 sys.path.append(str(BASE_DIR))  # -> ecommerce directory
 
-# Take environment variables from .env file
-environ.Env.read_env(BASE_DIR / ".env")
+# Take environment variables from .env file if it exists
+env_file = BASE_DIR / ".env"
+
+if env_file.exists():
+    environ.Env.read_env(env_file)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY")
