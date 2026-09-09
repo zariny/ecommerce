@@ -1,3 +1,7 @@
 *.log*
 media/
 sandbox/db.sqlite3
+.venv
+__pycache__
+.git
+.env

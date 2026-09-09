@@ -2,12 +2,12 @@
 set -e
 
 echo "Running migrations..."
-python sandbox/manage.py migrate 
+python sandbox/manage.py migrate --noinput
 
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
     echo "Creating superuser if needed..."
 
-    python manage.py shell <<EOF
+    python sandbox/manage.py shell <<EOF
 from django.contrib.auth import get_user_model
 
 User = get_user_model()

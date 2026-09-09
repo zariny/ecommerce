@@ -3,7 +3,8 @@ FROM python:3.14-slim
 WORKDIR /ecommerce
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+    PYTHONUNBUFFERED=1 \
+    PATH="/ecommerce/.venv/bin:$PATH"
 
 COPY pyproject.toml uv.lock ./
 
@@ -14,9 +15,8 @@ COPY . .
 
 EXPOSE 8000
 
-COPY entrypoint.sh .
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT ["./entrypoint.sh"]
 
-CMD ["uv", "run", "uvicorn", "sandbox.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "sandbox.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
