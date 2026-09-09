@@ -1,23 +1,22 @@
-FROM python:3.12
+FROM python:3.14-slim
 
-RUN mkdir /ecommerce
 WORKDIR /ecommerce
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-RUN pip install --upgrade pip
+COPY pyproject.toml uv.lock ./
 
-COPY requirements.txt /ecommerce/
-RUN pip install --no-cache-dir -r /ecommerce/requirements.txt
+RUN pip install --no-cache-dir uv \
+    && uv sync --locked --no-dev
 
-COPY . /ecommerce/
-COPY ../entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENV DJANGO_SUPERUSER_EMAIL=root@email.com
-ENV DJANGO_SUPERUSER_PASSWORD=root
+COPY . .
 
 EXPOSE 8000
-RUN sh /entrypoint.sh
-CMD ["python", "sandbox/manage.py", "runserver", "0.0.0.0:8000"]
+
+COPY entrypoint.sh .
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT ["./entrypoint.sh"]
+
+CMD ["uv", "run", "uvicorn", "sandbox.asgi:application", "--host", "0.0.0.0", "--port", "8000"]
