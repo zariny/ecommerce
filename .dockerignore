@@ -5,3 +5,4 @@ sandbox/db.sqlite3
 __pycache__
 .git
 .env
+staticfiles

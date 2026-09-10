@@ -9,3 +9,4 @@ lab*
 .pytest_cache
 .python-version
 site
+staticfiles
