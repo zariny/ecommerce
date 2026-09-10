@@ -4,6 +4,12 @@ set -e
 echo "Running migrations..."
 python sandbox/manage.py migrate --noinput
 
+echo "Sync Enum permission..."
+python sandbox/manage.py sync_permissions
+
+echo "Collect static files..."
+python sandbox/manage.py collectstatic --noinput
+
 if [ -n "$DJANGO_SUPERUSER_EMAIL" ] && [ -n "$DJANGO_SUPERUSER_PASSWORD" ]; then
     echo "Creating superuser if needed..."
 
