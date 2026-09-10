@@ -1,75 +1,91 @@
 .DEFAULT_GOAL := help
+SHELL := bash
+.SHELLFLAGS := -eu -o pipefail -c
 
 MANAGE := uv run sandbox/manage.py
 APP ?=
+IMAGE_NAME ?= ecommerce
+IMAGE_TAG ?= latest
 
-.PHONY: help dev runserver check mm migrate superuser shell test env schema json-schema erd doc docs-build
+.PHONY: help dev runserver check mm migrate superuser shell test \
+	sync_permissions staticfiles up env schema json-schema erd \
+	docs docs-build image container-run
 
 ## Development
-dev:
+dev: ## Run uvicorn with auto reload
 	uv run uvicorn sandbox.asgi:application --reload
 
-runserver:
+runserver: ## Run Django development server
 	$(MANAGE) runserver
 
 ## Database
-mm:
+mm: ## Create migrations (APP=users)
 	$(MANAGE) makemigrations $(APP)
 
-migrate:
+migrate: ## Apply migrations
 	$(MANAGE) migrate
 
 ## Django
-check:
+check: ## Run Django system checks
 	$(MANAGE) check
 
-shell:
+shell: ## Open Django shell
 	$(MANAGE) shell
 
-superuser:
+superuser: ## Create Django superuser
 	$(MANAGE) createsuperuser
 
-test:
+test: ## Run tests
 	$(MANAGE) test
 
-sync_permissions:
+sync_permissions: ## Sync custom permissions
 	$(MANAGE) sync_permissions
 
-## Utilities
-env:
-	@test -f .env || cp .env.example .env
-	@echo "✅ .env is ready."
+staticfiles: ## Collect static files
+	$(MANAGE) collectstatic
 
-schema:
+## Utilities
+up: env dev ## Prepare .env and run dev server
+	@echo "⚠️  development environment"
+
+env: ## Create .env from .env.example if missing
+	@test -f .env || cp .env.example .env
+	@echo "⚠️  dummy .env file is ready."
+
+schema: ## Export GraphQL schema
 	$(MANAGE) export_schema sandbox.schema.dashboard:schema > docs/graphql/schema.graphql
 
-json-schema: schema
+json-schema: schema ## Convert schema to introspection JSON
 	uv run scripts/schema_to_introspection.py docs/graphql/schema.graphql docs/graphql/schema.json
 
-erd:
+erd: ## Generate ERD diagram
 	$(MANAGE) generate_erd -d mermaid -o docs/models/erd.mmd
 
 ## Docs
-docs: json-schema erd
+docs: json-schema erd ## Serve docs locally
 	uv run --group docs mkdocs serve
 
-docs-build: json-schema erd
+docs-build: json-schema erd ## Build static docs
 	uv run --group docs mkdocs build
+
+## Docker
+image: ## Build docker image
+	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+container-run: env ## Run docker container
+	docker run \
+		--name ecommerce-backend \
+		--env-file .env \
+		-e DEBUG=False \
+		-p 8000:8000 \
+		$(IMAGE_NAME):$(IMAGE_TAG)
+
 ## Help
-help:
+help: ## Show this help
 	@echo ""
 	@echo "Usage:"
-	@echo "  make <target>"
+	@echo "  make <target> [APP=app_name]"
 	@echo ""
 	@echo "Targets:"
-	@printf "  %-15s %s\n" "dev" "Run uvicorn with auto reload"
-	@printf "  %-15s %s\n" "runserver" "Run Django development server"
-	@printf "  %-15s %s\n" "check" "Run Django system checks"
-	@printf "  %-15s %s\n" "mm APP=users" "Create migrations"
-	@printf "  %-15s %s\n" "migrate" "Apply migrations"
-	@printf "  %-15s %s\n" "superuser" "Create Django superuser"
-	@printf "  %-15s %s\n" "shell" "Open Django shell"
-	@printf "  %-15s %s\n" "test" "Run tests"
-	@printf "  %-15s %s\n" "schema" "Export GraphQL schema"
-	@printf "  %-15s %s\n" "env" "Create .env from .env.example"
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  %-18s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""
