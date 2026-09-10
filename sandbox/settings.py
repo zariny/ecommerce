@@ -29,7 +29,7 @@ if env_file.exists():
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env("DEBUG")
+DEBUG = env("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "treebeard",
     "strawberry_django",
+    "whitenoise.runserver_nostatic",
 ]
 
 if DEBUG:
@@ -67,6 +68,7 @@ if DEBUG:
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -103,11 +105,20 @@ TEMPLATES = [
     },
 ]
 
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # WSGI_APPLICATION = "wsgi.application"
 ASGI_APPLICATION = "sandbox.asgi.application"
 
 # Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
     "default": {
@@ -122,7 +133,6 @@ DATABASES = {
 
 
 # Caches
-
 CACHES = {
     "default": {
         "BACKEND": env("CACHE_BACKEND"),
@@ -244,9 +254,10 @@ if env("LOGGING_QUERIES", default=False):
 
 
 # CORS configuration
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS")
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS", default=False)
 CORS_ALLOW_CREDENTIALS = env.bool(
-    "CORS_ALLOW_CREDENTIALS"
+    "CORS_ALLOW_CREDENTIALS", default=False
 )  # Allow cookies to be sent/received
 
 
@@ -270,10 +281,14 @@ STRAWBERRY_DJANGO = {
 }
 
 JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=env.int("ACCESS_TOKEN_LIFETIME_MINUTES", default=5)
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=env.int("REFRESH_TOKEN_LIFETIME_DAYS", default=7)
+    ),
     "JWT_AUTH_EXEMPT_PATHS": ("/admin/",),
-    "JWT_SIGN_KEY": "strong_and_secret_key_for_jwt_signature",
-    "FIELD_ENCRYPTION_KEY": "qJ8v5W0xN7mK3pL2sR9tY4uI6oP1aS8dF7gH2jK5lM0=",  # print(Fernet.generate_key().decode()
+    "JWT_SIGN_KEY": env("JWT_SIGN_KEY"),
+    "FIELD_ENCRYPTION_KEY": env("FIELD_ENCRYPTION_KEY"),
     "REFRESH_COOKIE_PATH": "/dashboard/graphql",
 }
