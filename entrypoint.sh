@@ -1,11 +1,11 @@
 #!/bin/sh
 set -e
 
-echo "Running migrations..."
-python sandbox/manage.py migrate --noinput
+# echo "Running migrations..."
+# python sandbox/manage.py migrate --noinput
 
-echo "Sync Enum permission..."
-python sandbox/manage.py sync_permissions
+# echo "Sync Enum permission..."
+# python sandbox/manage.py sync_permissions
 
 echo "Collect static files..."
 python sandbox/manage.py collectstatic --noinput
