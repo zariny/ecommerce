@@ -10,3 +10,7 @@ lab*
 .python-version
 site
 staticfiles
+.env.lock
+.env.local
+.env.vercel
+.vercel

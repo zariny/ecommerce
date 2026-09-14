@@ -6,3 +6,6 @@ __pycache__
 .git
 .env
 staticfiles
+.env.lock
+.env.local
+.env.vercel
