@@ -4,16 +4,21 @@ from django.contrib import admin
 from django.conf import settings
 from strawberry.django.views import AsyncGraphQLView
 from .schema import public_schema, dashboard_schema
+from utils.views import home
 
 
 urlpatterns = [
+    path("", home, name="home"),
     path("admin/", admin.site.urls),
     path(
-        "graphql/", ensure_csrf_cookie(AsyncGraphQLView.as_view(schema=public_schema))
+        "graphql/",
+        ensure_csrf_cookie(AsyncGraphQLView.as_view(schema=public_schema)),
+        name="graphql-api",
     ),
     path(
         "dashboard/graphql/",
         ensure_csrf_cookie(AsyncGraphQLView.as_view(schema=dashboard_schema)),
+        name="dashboard-graphql-api",
     ),
 ]
 
