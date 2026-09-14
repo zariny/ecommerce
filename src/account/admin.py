@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as AuthUserAdmin
-
 from . import models
 
 
@@ -9,18 +8,34 @@ class UserAdmin(AuthUserAdmin):
     fieldsets = (
         (None, {"fields": ("email", "password")}),
         ("Personal info", {"fields": ("first_name", "last_name")}),
-        ("Permissions", {
-            "fields": ("is_active", "is_confirmed", "is_staff", "is_superuser", "groups", "user_permissions")
-        }),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_active",
+                    "is_confirmed",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
+        ),
         ("Meta", {"fields": ("metadata", "description")}),
-        ("Avatar", {"fields": ("avatar",)}),
-        ("Dates", {"fields": ("last_login",)})
+        ("Dates", {"fields": ("last_login",)}),
+        # ("Avatar", {"fields": ("avatar",)}),
+        # BUG Temporarily disabled: multipart/form-data POSTs
+        # fail with "CSRF token missing" on Vercel Docker deployment because Content-Length
+        # isn't forwarded correctly for multipart requests!
     )
 
     add_fieldsets = (
         (
             None,
-            {"classes": ("wide",), "fields": ("email", "usable_password", "password1", "password2"),}
+            {
+                "classes": ("wide",),
+                "fields": ("email", "usable_password", "password1", "password2"),
+            },
         ),
     )
 
