@@ -43,11 +43,10 @@ class BasePermission(enum.Enum):
         return obj
 
     def __and__(self, other):
-        if isinstance(other, list):
-            if self not in other:
-                other.append(self)
+        if isinstance(other, set):
+            other.add(self)
             return other
-        return [self, other]
+        return {self, other}
 
     def __rand__(self, other):
         return self.__and__(other)
