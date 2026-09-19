@@ -11,3 +11,7 @@ class DashboardPermission(BasePermission):
         description="This permission is for accessing the internal admin panel.",
     )
     SUPERUSER = ActionPerm(lambda user: user.is_superuser and user.is_active)
+
+
+class PermissionManager(BasePermission):
+    PERMISSION_MANAGER = GrantPerm()
