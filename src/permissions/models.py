@@ -7,6 +7,14 @@ from django.contrib.auth.models import (
     PermissionManager as AuthPermissionManager,
 )
 from account.models import User
+from itertools import groupby
+from dataclasses import dataclass
+
+
+@dataclass
+class PermissionCluster:
+    name: str
+    branches: list["Permission"]
 
 
 class EnumPermission(models.Model):
@@ -25,6 +33,15 @@ class PermissionManager(AuthPermissionManager):
         if self._enum_permission is None:
             self._enum_permission = ContentType.objects.get_for_model(EnumPermission)
         return self._enum_permission
+
+    def clusters(self):
+        perms = self.get_queryset().order_by("codename")
+        return [
+            PermissionCluster(name=cluster_name, branches=list(group))
+            for cluster_name, group in groupby(
+                perms, key=lambda p: p.codename.partition(".")[0]
+            )
+        ]
 
 
 class Permission(AuthPermission):
