@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
-from utils.models import BaseSeoModel, ModelWithDescription, TranslationModel
 from treebeard.mp_tree import MP_Node, MP_NodeManager
+
+from utils.models import BaseSeoModel, ModelWithDescription, TranslationModel
 
 
 class ReverseStartsWithLookup(models.lookups.StartsWith):
@@ -35,12 +36,15 @@ class CategoryQuerySet(MP_NodeManager):
         return self.filter(is_public=True, ancestors_are_public=True)
 
 
-
 class Category(MP_Node, BaseSeoModel, ModelWithDescription):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(max_length=255, unique=True, auto_created="name", allow_unicode=True)
+    slug = models.SlugField(
+        max_length=255, unique=True, auto_created="name", allow_unicode=True
+    )
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
-    background = models.ImageField(upload_to="category-background", blank=True, null=True)
+    background = models.ImageField(
+        upload_to="category-background", blank=True, null=True
+    )
     background_caption = models.CharField(max_length=128, blank=True)
 
     is_public = models.BooleanField(default=True)
@@ -89,15 +93,15 @@ class Category(MP_Node, BaseSeoModel, ModelWithDescription):
 
     def refresh_ancestors_are_public(self):
         """
-            set correct value for (ancestors_are_public) field
-             via check ancestor's (is_public) field for each subtree.
+        set correct value for (ancestors_are_public) field
+         via check ancestor's (is_public) field for each subtree.
 
-            - this method avoid run a new save for each updated object.
+        - this method avoid run a new save for each updated object.
         """
         subquery = type(self)._default_manager.filter(
             is_public=False,
             path__rstartswith=models.OuterRef("path"),
-            depth__lt=models.OuterRef("depth")
+            depth__lt=models.OuterRef("depth"),
         )
 
         self.get_tree(self).update(
@@ -111,7 +115,9 @@ class Category(MP_Node, BaseSeoModel, ModelWithDescription):
 
 
 class CategoryTranslation(TranslationModel):
-    category = models.ForeignKey("catalogue.Category", on_delete=models.CASCADE, related_name="translations")
+    category = models.ForeignKey(
+        "catalogue.Category", on_delete=models.CASCADE, related_name="translations"
+    )
     name = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
 
@@ -119,16 +125,22 @@ class CategoryTranslation(TranslationModel):
         return "%s - %s" % (self.category.name, self.name or self._default_presentation)
 
     class Meta:
-        indexes = (
-            models.Index(fields=["category"]),
-            )
+        indexes = (models.Index(fields=["category"]),)
         app_label = "catalogue"
         unique_together = (("language_code", "category"),)
 
 
 class ProductCategory(models.Model):
-    category = models.ForeignKey("catalogue.Category", on_delete=models.CASCADE, related_name="product")
-    product = models.ForeignKey("products.Product", on_delete=models.CASCADE, related_name="category")
+    category = models.ForeignKey(
+        "catalogue.Category",
+        on_delete=models.CASCADE,
+        related_name="product_category_set",
+    )
+    product = models.ForeignKey(
+        "products.Product",
+        on_delete=models.CASCADE,
+        related_name="product_category_set",
+    )
 
     class Meta:
         app_label = "catalogue"
