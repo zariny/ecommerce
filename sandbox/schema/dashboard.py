@@ -7,7 +7,7 @@ from authentication import AuthenticateMutation
 from permissions.dashboard.query import PermissionQuery
 from permissions.integrations import __PermissionMetadata, with_permission
 from permissions.permissions import DashboardPermission as P
-from account.dashboard.query import AccountQuery
+from account.dashboard import *
 
 
 @with_permission(P.DASHBOARD_ACCESS)
@@ -28,9 +28,15 @@ class Mutation(AuthenticateMutation):
     pass
 
 
+@strawberry.type
+class Subscription(AccountSubscription):
+    pass
+
+
 schema = strawberry.Schema(
     query=Query,
     mutation=Mutation,
+    subscription=Subscription,
     config=StrawberryConfig(relay_max_results=25),
     extensions=[DjangoOptimizerExtension],
 )

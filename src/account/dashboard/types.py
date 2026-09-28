@@ -1,4 +1,5 @@
 from django.db.models import Prefetch
+from django.conf import settings
 import strawberry_django
 from strawberry import auto
 from strawberry.relay import Node
@@ -9,6 +10,8 @@ from utils.relay import CursorConnection
 from utils.types import ModelWithDescriptionType
 from .. import models
 from ..permissions import AccountPermissions as P
+
+redis = settings.REDIS_CLIENT
 
 
 @strawberry_django.filter_type(models.User, lookups=True)
@@ -26,6 +29,7 @@ class UserOrderType:
     last_login: auto
     updated_at: auto
     email: auto
+    # online_status: ... # TODO sorting by user online status
 
 
 @with_permission(P.USER_MANAGER)
@@ -96,6 +100,12 @@ class UserType(Node, ModelWithDescriptionType):
             PermissionType(codename=p.codename, name=p.name)
             for p in permissions.values()
         ]
+
+    @strawberry_django.field
+    async def online_status(
+        self,
+    ) -> bool:  # FIXME N+1 queries (use redis.hmget and DataLoaders)
+        return bool(await redis.hget("online:users", self.pk))
 
 
 @with_permission(P.GROUP_MANAGER)

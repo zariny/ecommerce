@@ -10,3 +10,10 @@ class AccountQuery:
     user: types.UserType = strawberry_django.node()
     groups: CursorConnection[types.GroupType] = strawberry_django.connection()
     group: types.GroupType = strawberry_django.node()
+
+    @strawberry.field
+    async def me(self, info: strawberry.types.Info) -> types.UserType | None:
+        user = await info.context.request.auser()
+        if not user or not user.is_authenticated:
+            return None
+        return user
