@@ -200,6 +200,10 @@ INTERNAL_IPS = [
 
 
 # LOGGING
+
+LOG_DIR = Path(BASE_DIR) / "logs"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -220,40 +224,30 @@ LOGGING = {
         },
         "file_sql": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs" / "sql.log",
+            "filename": str(LOG_DIR / "sql.log"),
             "formatter": "sql_file",
             "mode": "a",
             "maxBytes": 7000,
             "backupCount": 2,
-            "delay": False,
+            "delay": True,
+            "encoding": "utf-8",
         },
     },
     "loggers": {},
 }
 
 if DEBUG:
-    LOGGING.setdefault(
-        "loggers",
-        {
-            "django.db.backends": {
-                "handlers": ["console_sql"],
-                "level": "DEBUG",
-                "propagate": False,
-            }
-        },
-    )
+    LOGGING["loggers"]["django.db.backends"] = {
+        "handlers": ["console_sql"],
+        "level": "DEBUG",
+        "propagate": False,
+    }
 elif env("LOGGING_QUERIES", default=False):
-    LOGGING.setdefault(
-        "loggers",
-        {
-            "django.db.backends": {
-                "level": "ERROR",
-                "handlers": ["file_sql"],
-                "propagate": False,
-            }
-        },
-    )
-
+    LOGGING["loggers"]["django.db.backends"] = {
+        "level": "ERROR",
+        "handlers": ["file_sql"],
+        "propagate": False,
+    }
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
