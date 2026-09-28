@@ -14,3 +14,4 @@ staticfiles
 .env.local
 .env.vercel
 .vercel
+logs

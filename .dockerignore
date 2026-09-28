@@ -1,4 +1,5 @@
 *.log*
+logs
 media/
 sandbox/db.sqlite3
 .venv

@@ -200,53 +200,55 @@ INTERNAL_IPS = [
 
 
 # LOGGING
-import logging
-
-
-class MultiLineFormatter(logging.Formatter):  # TODO Bad practice
-    def format(self, record):
-        original_message = super().format(record)
-        max_length = 140
-        lines = [
-            original_message[i : i + max_length]
-            for i in range(0, len(original_message), max_length)
-        ]
-        s = "\n".join(lines)
-        return f"{s} \n"
-
-
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "multiline": {
-            "()": MultiLineFormatter,
-            "format": "[%(levelname)s]: %(message)s",
+        "sql_console": {
+            "()": "utils.formatters.PrettySQLFormatter",
+            "format": "\n[SQL] (%(duration).3f s)\n%(sql_pretty)s\n",
+        },
+        "sql_file": {
+            "()": "utils.formatters.RawSQLFormatter",
+            "format": "%(asctime)s (%(duration).3f) %(sql)s",
         },
     },
     "handlers": {
-        "console": {
+        "console_sql": {
             "class": "logging.StreamHandler",
+            "formatter": "sql_console",
         },
-        "logfile": {
+        "file_sql": {
             "class": "logging.handlers.RotatingFileHandler",
-            "filename": BASE_DIR / "logs" / "debug.log",
-            "formatter": "multiline",
+            "filename": BASE_DIR / "logs" / "sql.log",
+            "formatter": "sql_file",
             "mode": "a",
             "maxBytes": 7000,
             "backupCount": 2,
             "delay": False,
         },
     },
+    "loggers": {},
 }
 
-if env("LOGGING_QUERIES", default=False):
+if DEBUG:
     LOGGING.setdefault(
         "loggers",
         {
             "django.db.backends": {
+                "handlers": ["console_sql"],
                 "level": "DEBUG",
-                "handlers": ["logfile"],
+                "propagate": False,
+            }
+        },
+    )
+elif env("LOGGING_QUERIES", default=False):
+    LOGGING.setdefault(
+        "loggers",
+        {
+            "django.db.backends": {
+                "level": "ERROR",
+                "handlers": ["file_sql"],
                 "propagate": False,
             }
         },
@@ -292,3 +294,30 @@ JWT = {
     "FIELD_ENCRYPTION_KEY": env("FIELD_ENCRYPTION_KEY"),
     "REFRESH_COOKIE_PATH": "/dashboard/graphql",
 }
+
+# EMAIL
+default_email_backend = (
+    "django.core.mail.backends.filebased.EmailBackend"
+    if DEBUG
+    else "django.core.mail.backends.smtp.EmailBackend"
+)
+EMAIL_BACKEND = env("EMAIL_BACKEND", default=default_email_backend)
+EMAIL_HOST = env("EMAIL_HOST", default="")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="ecommerce@django")
+EMAIL_FILE_PATH = BASE_DIR / "logs" / "emails"
+
+
+# REDIS
+REDIS_URL = env("REDIS_URL")
+import redis.asyncio as redis
+
+REDIS_CLIENT = redis.Redis.from_url(  # Singleton
+    REDIS_URL,
+    max_connections=50,
+    decode_responses=True,
+)
