@@ -205,11 +205,11 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "sql_console": {
-            "()": "utils.formatters.PrettySQLFormatter",
+            "()": "src.utils.formatters.PrettySQLFormatter",
             "format": "\n[SQL] (%(duration).3f s)\n%(sql_pretty)s\n",
         },
         "sql_file": {
-            "()": "utils.formatters.RawSQLFormatter",
+            "()": "src.utils.formatters.RawSQLFormatter",
             "format": "%(asctime)s (%(duration).3f) %(sql)s",
         },
     },

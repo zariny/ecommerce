@@ -1,4 +1,3 @@
-# myapp/logging_formatters.py
 import logging
 import sqlparse
 from pygments import highlight
