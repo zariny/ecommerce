@@ -1,3 +1,5 @@
+from django.http.cookie import parse_cookie
+from abc import ABCMeta
 import jwt
 from inspect import iscoroutinefunction, markcoroutinefunction
 from django.contrib.auth.models import AnonymousUser
@@ -90,3 +92,62 @@ class JWTCookieAuthMiddleware:
 
     def is_exempt(self, request) -> bool:
         return request.path.startswith(self.EXEMPT_PATH_PREFIXES)
+
+
+class AbstractJWTMiddleware(metaclass=ABCMeta):
+    async def __call__(self):
+        raise NotImplementedError
+
+    async def __acall__(self):  # Django convention
+        raise NotImplementedError
+
+    def pars_token(self, cookies):
+        token = cookies.get("access")
+        if not token:
+            return None
+        try:
+            payload = JWTToken(token).payload
+        except jwt.ExpiredSignatureError, jwt.InvalidTokenError:
+            return None
+
+        if payload.get("token_type") == "access":
+            return payload
+        return None
+
+
+class ChannelsJWTMiddleware(AbstractJWTMiddleware):
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, recive, send):
+        headers = dict(scope["headers"])
+        cookies = parse_cookie(headers.get(b"cookie", b"").decode())
+        payload = self.pars_token(cookies)
+        scope["auser"] = LazyUser(payload)
+        return await self.app(scope, recive, send)
+
+
+async def aget_user(payload=None):
+    if payload is None:
+        return AnonymousUser()
+    pk = payload.get("user_id", None)
+    if pk is not None:
+        try:
+            return await User.objects.aget(pk=pk)
+        except User.DoesNotExist:
+            pass
+    return AnonymousUser()
+
+
+class LazyUser:
+    def __init__(self, payload):
+        self.payload = payload
+        self._user = None  # cache user to avoid multi queries per a request
+
+    def __await__(self):
+        async def resolve():
+            if self._user is None:
+                self._user = await aget_user(self.payload)
+            return self._user
+
+        return resolve().__await__()
