@@ -62,13 +62,15 @@ class IsRequiredShipping(admin.SimpleListFilter):
 
 
 class ProductAttributeInline(admin.TabularInline):
-    model = models.Attribute.product_class.through
+    model = models.AttributeProductClass
     extra = 1
 
 
 class ParentProductClassInline(admin.TabularInline):
     model = models.ProductClassEdge
     fk_name = "child"
+    verbose_name = "Parent class"
+    verbose_name_plural = "Parents"
     extra = 1
 
 
@@ -78,17 +80,31 @@ class ProductCategoryInline(admin.StackedInline):
     extra = 1
 
 
+class ProductClassAttributeVariant(admin.TabularInline):
+    model = models.AttributeVariant
+    fk_name = "product_class"
+    extra = 1
+
+
+class ProductAttributeValueInline(admin.StackedInline):
+    model = models.AssignedProductAttributeValue
+    fk_name = "product"
+    extra = 1
+    autocomplete_fields = ("value",)
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("title", "is_public", "updated_at")
     search_fields = ("title",)
     list_filter = (IsPublicFilter,)
-    inlines = (ProductCategoryInline,)
+    inlines = (ProductCategoryInline, ProductAttributeValueInline)
 
 
 @admin.register(models.AttributeValue)
 class ProductAttributeValueAdmin(admin.ModelAdmin):
     list_display = ("attribute", "data_type")
+    search_fields = ("label", "value")
 
 
 @admin.register(models.Attribute)
@@ -102,7 +118,11 @@ class ProductAttributeAdmin(admin.ModelAdmin):
 @admin.register(models.ProductClass)
 class ProductClassAdmin(admin.ModelAdmin):
     list_display = ("title", "abstract", "require_shipping", "track_stock")
-    inlines = (ParentProductClassInline, ProductAttributeInline)
+    inlines = (
+        ParentProductClassInline,
+        ProductAttributeInline,
+        ProductClassAttributeVariant,
+    )
     list_filter = (
         IsAbstraction,
         IsRequiredShipping,
@@ -113,6 +133,28 @@ class ProductClassAdmin(admin.ModelAdmin):
 class ProductMediaAdmin(admin.ModelAdmin):
     list_display = ("product__title", "image", "published")
     autocomplete_fields = ("product",)
+
+
+class AssignedVariantAttributeValueInline(admin.TabularInline):
+    model = models.AssignedVariantAttributeValue
+    fk_name = "variant"
+    extra = 1
+
+
+@admin.register(models.ProductVariant)
+class VariantModelAdmin(admin.ModelAdmin):
+    list_display = ("sku", "name", "product", "updated_at")
+    inlines = [AssignedVariantAttributeValueInline]
+
+
+@admin.register(models.AssignedVariantAttribute)
+class AssignedVariantAttributeAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.AttributeVariant)
+class AttributeVariantAdmin(admin.ModelAdmin):
+    pass
 
 
 admin.site.register(models.ProductClassEdge)
