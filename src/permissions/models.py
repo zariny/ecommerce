@@ -1,7 +1,6 @@
 from typing import Self
 from asgiref.sync import sync_to_async
 from django.db import models
-from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import (
     Permission as AuthPermission,
     PermissionManager as AuthPermissionManager,
@@ -23,16 +22,15 @@ class EnumPermission(models.Model):
 
 
 class PermissionManager(AuthPermissionManager):
-    _enum_permission = None  # EnumPermission content type
-
     def get_queryset(self):
-        return super().get_queryset().filter(content_type=self.enum_permission)
-
-    @property
-    def enum_permission(self) -> ContentType[EnumPermission]:
-        if self._enum_permission is None:
-            self._enum_permission = ContentType.objects.get_for_model(EnumPermission)
-        return self._enum_permission
+        return (
+            super()
+            .get_queryset()
+            .filter(
+                content_type__app_label=EnumPermission._meta.app_label,
+                content_type__model=EnumPermission._meta.model_name,
+            )
+        )
 
     def clusters(self):
         perms = self.get_queryset().order_by("codename")

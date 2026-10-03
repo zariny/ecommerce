@@ -17,6 +17,7 @@ redis = settings.REDIS_CLIENT
 @strawberry_django.filter_type(models.User, lookups=True)
 class UserFilterType:
     id: auto
+    email: auto
     is_active: auto
     is_confirmed: auto
     is_superuser: auto
@@ -67,7 +68,7 @@ class UserType(Node, ModelWithDescriptionType):
                     Prefetch(
                         "permissions",
                         queryset=Permission.objects.all(),
-                        to_attr="_permissions",
+                        to_attr="_group_permissions",
                     )
                 ),
             ),
@@ -75,30 +76,18 @@ class UserType(Node, ModelWithDescriptionType):
 
     @strawberry_django.field(extensions=[Perm(P.VIEW_USER_PERMISSIONNS)])
     def permissions(self) -> list[PermissionType]:
-        permissions = {}
-
-        for p in getattr(self, "_direct_permissions", []):
-            permissions[p.pk] = p
-
-        return [
-            PermissionType(
-                codename=p.codename,
-                name=p.name,
-            )
-            for p in permissions.values()
-        ]
+        perms = getattr(self, "_direct_permissions", None)
+        if perms is None:
+            perms = [p for p in Permission.objects.filter(user=self)]
+        return [PermissionType(codename=p.codename, name=p.name) for p in perms]
 
     @strawberry_django.field(extensions=[Perm(P.VIEW_GROUP_PERMISSIONS)])
-    def group_permissions(self) -> list[PermissionType]:
-        permissions = {}
-
-        for group in self.groups.all():
-            for p in getattr(group, "_permissions", []):
-                permissions[p.pk] = p
-
+    def group_permissions(
+        self,
+    ) -> list[PermissionType]:  # FIXME use prefetch related _group_permissions
         return [
             PermissionType(codename=p.codename, name=p.name)
-            for p in permissions.values()
+            for p in Permission.objects.filter(group__user=self)
         ]
 
     @strawberry_django.field
