@@ -33,6 +33,7 @@ DEBUG = env("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS")
+CSRF_FAILURE_VIEW = "utils.views.csrf_failure"
 
 # Application definition
 
@@ -307,11 +308,19 @@ EMAIL_FILE_PATH = BASE_DIR / "logs" / "emails"
 
 
 # REDIS
-REDIS_URL = env("REDIS_URL")
 import redis.asyncio as redis
+from redis.asyncio.retry import Retry
+from redis.backoff import ExponentialBackoff
 
+REDIS_URL = env("REDIS_URL")
 REDIS_CLIENT = redis.Redis.from_url(  # Singleton
     REDIS_URL,
     max_connections=50,
+    socket_connect_timeout=10,
+    socket_timeout=10,
+    retry=Retry(ExponentialBackoff(cap=2, base=0.1), retries=3),
+    retry_on_error=[TimeoutError, ConnectionError],
+    health_check_interval=30,
+    socket_keepalive=True,
     decode_responses=True,
 )

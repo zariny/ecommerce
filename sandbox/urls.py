@@ -22,6 +22,8 @@ urlpatterns = [
     ),
 ]
 
+GRAPHQL_API_URLS = ("/graphql/", "/dashboard/graphql/")
+
 
 if settings.DEBUG:
     from django.conf.urls.static import static
