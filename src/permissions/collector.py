@@ -41,7 +41,6 @@ def collect_grant_permissions():
 
 
 def sync_enum_permissions():
-    content_type = Permission.objects.enum_permission
     current_codenames = set()
 
     for permission in collect_grant_permissions():
@@ -51,15 +50,12 @@ def sync_enum_permissions():
             raise ValueError(f"Duplicate permission codename found: {codename!r}")
 
         Permission.objects.update_or_create(
-            content_type=content_type,
             codename=codename,
             defaults={"name": permission.name},
         )
 
         current_codenames.add(codename)
 
-    Permission.objects.filter(
-        content_type=content_type,
-    ).exclude(
+    Permission.objects.filter().exclude(
         codename__in=current_codenames,
     ).delete()
