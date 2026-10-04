@@ -1,7 +1,7 @@
 import logging
 import sqlparse
 from pygments import highlight
-from pygments.lexers import SqlLexer
+from pygments.lexers import SqlLexer, GraphQLLexer
 from pygments.formatters import TerminalTrueColorFormatter
 
 
@@ -23,5 +23,16 @@ class PrettySQLFormatter(logging.Formatter):
         return super().format(record)
 
 
-class RawSQLFormatter(logging.Formatter):
-    pass
+class PrettyGraphQLFormatter(logging.Formatter):
+    def format(self, record):
+        if hasattr(record, "query") and record.query:
+            colored = highlight(
+                record.query,
+                GraphQLLexer(),
+                TerminalTrueColorFormatter(style="monokai"),
+            )
+            record.query_pretty = colored.rstrip("\n")
+        else:
+            record.query_pretty = getattr(record, "query", "")
+
+        return super().format(record)

@@ -83,6 +83,7 @@ MIDDLEWARE = [
 if DEBUG:
     MIDDLEWARE += [
         "strawberry_django.middlewares.debug_toolbar.DebugToolbarMiddleware",
+        "utils.development.GraphQLLoggingMiddleware",
     ]
 
 
@@ -213,15 +214,25 @@ LOGGING = {
             "()": "src.utils.formatters.PrettySQLFormatter",
             "format": "\n[SQL] (%(duration).3f s)\n%(sql_pretty)s\n",
         },
+        "graphql_console": {
+            "()": "src.utils.formatters.PrettyGraphQLFormatter",
+            "format": "\n[GRAPHQL]\n%(query_pretty)s\nvariables=%(variables)s",
+        },
         "sql_file": {
-            "()": "src.utils.formatters.RawSQLFormatter",
             "format": "%(asctime)s (%(duration).3f) %(sql)s",
+        },
+        "graphql_file": {
+            "format": "query=%(query)s variables=%(variables)s",
         },
     },
     "handlers": {
-        "console_sql": {
+        "stream_sql": {
             "class": "logging.StreamHandler",
             "formatter": "sql_console",
+        },
+        "stream_graphql": {
+            "class": "logging.StreamHandler",
+            "formatter": "graphql_console",
         },
         "file_sql": {
             "class": "logging.handlers.RotatingFileHandler",
@@ -233,16 +244,32 @@ LOGGING = {
             "delay": True,
             "encoding": "utf-8",
         },
+        "file_graphql": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": str(LOG_DIR / "graphql.log"),
+            "formatter": "graphql_file",
+            "mode": "a",
+            "maxBytes": 7000,
+            "backupCount": 2,
+            "delay": True,
+            "encoding": "utf-8",
+        },
+        "console": {"class": "logging.StreamHandler"},
     },
     "loggers": {},
 }
 
 if DEBUG:
     LOGGING["loggers"]["django.db.backends"] = {
-        "handlers": ["console_sql"],
+        "handlers": ["stream_sql"],
         "level": "DEBUG",
         "propagate": False,
     }
+    LOGGING["loggers"]["graphql.requests"] = {
+        "handlers": ["stream_graphql"],
+        "level": "DEBUG",
+    }
+    LOGGING["loggers"]["django.request"] = {"handlers": ["console"], "level": "DEBUG"}
 elif env("LOGGING_QUERIES", default=False):
     LOGGING["loggers"]["django.db.backends"] = {
         "level": "ERROR",
