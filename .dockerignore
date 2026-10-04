@@ -10,3 +10,5 @@ staticfiles
 .env.lock
 .env.local
 .env.vercel
+.env*
+!.env.example

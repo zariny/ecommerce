@@ -15,3 +15,5 @@ staticfiles
 .env.vercel
 .vercel
 logs
+.env*
+!.env.example
