@@ -8,6 +8,8 @@ from permissions.dashboard.query import PermissionQuery
 from permissions.integrations import __PermissionMetadata, with_permission
 from permissions.permissions import DashboardPermission as P
 from account.dashboard import *
+from basket.dashboard.queries import BasketQuery
+from order.dashboard.query import OrderQuery
 
 
 @with_permission(P.DASHBOARD_ACCESS)
@@ -17,6 +19,8 @@ class Query(
     ProductsQuery,
     PermissionQuery,
     AccountQuery,
+    BasketQuery,
+    OrderQuery,
     __PermissionMetadata,
 ):
     node: strawberry.relay.Node = strawberry.relay.node()
