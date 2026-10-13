@@ -6,18 +6,18 @@ from django.db.models import Max, Count
 from datetime import timedelta
 import datetime as dt
 from itertools import groupby
-from utils.charts import ChartData, Granularity, SeriesMeta, DataPoint, Bucket
+from utils.charts import DateChart, Granularity, SeriesMeta, DataPoint, Bucket
 
 
 @strawberry.type
 class BasketQuery:
     @strawberry_django.field
-    def basket_status_moving_window(self) -> ChartData:  # TODO cache result
+    def basket_status_moving_window(self) -> DateChart:  # TODO cache result
         statuses = [s for s, _ in Basket.STATUS_CHOICES]
 
         last = Basket.objects.aggregate(last=Max("date_created"))["last"]
         if last is None:
-            return ChartData(
+            return DateChart(
                 title="Basket status over the last 6 weeks",
                 granularity=Granularity.WEEK,
                 series=[SeriesMeta(key=s, label=s) for s in statuses],
@@ -62,7 +62,7 @@ class BasketQuery:
                 )
             )
 
-        return ChartData(
+        return DateChart(
             title="Basket status over the last 6 weeks",
             granularity=Granularity.WEEK,
             series=[SeriesMeta(key=s, label=s) for s in statuses],
