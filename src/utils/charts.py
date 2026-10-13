@@ -3,6 +3,23 @@ import datetime as dt
 import strawberry
 
 
+@strawberry.interface
+class MetaDataType:
+    metadata: strawberry.scalars.JSON | None = strawberry.field(
+        default=None, description="Some metadata stored in json structure."
+    )
+
+
+@strawberry.interface
+class ChartAndPlotType:
+    title: str | None = strawberry.field(
+        default=None, description="Suggested chart title."
+    )
+    generated_at: dt.datetime = strawberry.field(
+        default="Generation time (useful for caching/display)."
+    )
+
+
 @strawberry.enum(description="Granularity of the X axis.")
 class Granularity(Enum):
     DAY = "day"
@@ -47,10 +64,7 @@ class Bucket:
 @strawberry.type(
     description="Generic output for categorical/time charts (stacked bar, line, area, ...)."
 )
-class ChartData:
-    title: str | None = strawberry.field(
-        default=None, description="Suggested chart title."
-    )
+class DateChart(ChartAndPlotType, MetaDataType):
     granularity: Granularity = strawberry.field(description="X axis granularity.")
     series: list[SeriesMeta] = strawberry.field(
         description="All series, in display order."
@@ -59,6 +73,15 @@ class ChartData:
         description="X axis points in ascending time order."
     )
 
-    generated_at: dt.datetime = strawberry.field(
-        default="Generation time (useful for caching/display)."
+
+@strawberry.type
+class SimpleChart(ChartAndPlotType):
+    lines: list["NumericPoint"] = strawberry.field(
+        description="X axis points in ascending order."
     )
+
+
+@strawberry.type
+class NumericPoint:
+    label: str = strawberry.field(description="Human-readable name shown to the user.")
+    num: int = strawberry.field(description="Raw count, number ")
